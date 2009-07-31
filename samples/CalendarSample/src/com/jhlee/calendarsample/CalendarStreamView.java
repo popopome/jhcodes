@@ -19,7 +19,10 @@ public class CalendarStreamView extends View {
 
 	public static final String TAG = "CalendarStreamView";
 	public static final long ONEWEEK_IN_MILLISECONDS = 60 * 60 * 24 * 7 * 1000;
-
+	private static final int COLOR_SUNDAY = Color.rgb(255, 0, 0);
+	private static final int COLOR_SATURDAY = Color.rgb(0, 0, 255);
+	private static final int COLOR_WEEKDAY = Color.BLACK; 
+	
 	/* Base date */
 	private Calendar mBaseDate = new GregorianCalendar(new SimpleTimeZone(0,
 			"GMT"));
@@ -224,20 +227,24 @@ public class CalendarStreamView extends View {
 				}
 				
 				/* Draw day text */
-				mPaint.setColor(Color.BLACK);
+				mPaint.setColor(COLOR_SUNDAY);
 				xPos = 0;
 				for (int dayIndex = 0; dayIndex < 7; ++dayIndex) {
 					canvas.drawText(mNumString[curWeekStartDay + dayIndex - 1],
 							xPos + mDayWidth - mDayRightPadding, screenY
 									+ mTextHeight + mDayTopPadding, mPaint);
 					xPos += mDayWidth;
+					/* Prepare color for next day. 
+					 * I checked here if current day is friday,
+					 * then use saturday color for next day.
+					 */
+					if(dayIndex == 5)
+						mPaint.setColor(COLOR_SATURDAY);
+					else
+						mPaint.setColor(COLOR_WEEKDAY);
 				}
 			} else {
-				if ((curWeekMonth & 0x01) == 0x01)
-					bgColor = mOddMonthColor;
-				else
-					bgColor = mEvenMonthColor;
-
+				
 				/*
 				 * We know current week has days from different month. And
 				 * nextWeekStartDay SHOULD be less than 7 because next week is
@@ -246,17 +253,32 @@ public class CalendarStreamView extends View {
 				int xPos = 0;
 				int cnt = 7 - (nextWeekStartDay - 1);
 				int dayIndex = 0;
+
+				/* Decide background color */
+				if ((curWeekMonth & 0x01) == 0x01)
+					bgColor = mOddMonthColor;
+				else
+					bgColor = mEvenMonthColor;
+
+				
 				for (dayIndex = 0; dayIndex < cnt; ++dayIndex) {
+					/* Draw background */
 					mPaint.setColor(bgColor);
 					canvas.drawRect(xPos, screenY, xPos + mDayWidth, screenY
 							+ mWeekHeight, mPaint);
-					mPaint.setColor(Color.BLACK);
+					/* Draw day text */
+					if(0 == dayIndex)
+						mPaint.setColor(COLOR_SUNDAY);
+					else
+						mPaint.setColor(COLOR_WEEKDAY);
+
 					canvas.drawText(mNumString[curWeekStartDay + dayIndex - 1],
 							xPos + mDayWidth - mDayRightPadding, screenY
 									+ mTextHeight + mDayTopPadding, mPaint);
 					xPos += mDayWidth;
 				}
 
+				/* This is next month. We set different background color. */
 				if ((nextWeekMonth & 0x01) == 0x01)
 					bgColor = mOddMonthColor;
 				else
@@ -266,14 +288,17 @@ public class CalendarStreamView extends View {
 				for (dayIndex = 0; dayIndex < cnt; ++dayIndex) {
 					mPaint.setColor(bgColor);
 
+					/* Is this saturday? */
 					if (dayIndex == cnt - 1) {
 						canvas.drawRect(xPos, screenY, this.getWidth(), screenY
 								+ mWeekHeight, mPaint);
+						mPaint.setColor(COLOR_SATURDAY);
 					} else {
+						/* Regular week day */
 						canvas.drawRect(xPos, screenY, xPos + mDayWidth,
 								screenY + mWeekHeight, mPaint);
+						mPaint.setColor(COLOR_WEEKDAY);
 					}
-					mPaint.setColor(Color.BLACK);
 					canvas.drawText(mNumString[dayIndex], xPos + mDayWidth
 							- mDayRightPadding, screenY + mTextHeight
 							+ mDayTopPadding, mPaint);
