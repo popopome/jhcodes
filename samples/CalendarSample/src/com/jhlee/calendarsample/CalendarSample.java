@@ -1,15 +1,12 @@
 package com.jhlee.calendarsample;
 
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.SimpleTimeZone;
-import java.util.TimeZone;
-
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Toast;
 
 public class CalendarSample extends Activity {
 	public static final String TAG = "CALENDARSAMPLE";
@@ -19,5 +16,14 @@ public class CalendarSample extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+        final Context ctx = this;
+        CalendarStreamView view = (CalendarStreamView)this.findViewById(R.id.calendarStream);
+        view.setClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(ctx, R.string.date_is_clicked, Toast.LENGTH_LONG).show();
+			}
+        });
     }
 }

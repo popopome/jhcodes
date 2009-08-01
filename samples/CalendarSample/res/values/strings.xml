@@ -2,4 +2,5 @@
 <resources>
     <string name="hello">Hello World, CalendarSample!</string>
     <string name="app_name">CalendarSample</string>
+    <string name="date_is_clicked">Date is clicked</string>
 </resources>
