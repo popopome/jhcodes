@@ -28,6 +28,7 @@ public class TextBlurView extends View {
 	private Bitmap mTextBitmap;
 	private boolean mMouseDownFlag = false;
 	private boolean mMouseInside = false;
+	private boolean mMouseMovedOutside = true;
 
 	/** CTOR */
 	public TextBlurView(Context ctx) {
@@ -42,7 +43,6 @@ public class TextBlurView extends View {
 	public TextBlurView(Context ctx, AttributeSet attrs) {
 		super(ctx, attrs);
 		initializeInternal(attrs);
-
 	}
 
 	/**
@@ -57,7 +57,11 @@ public class TextBlurView extends View {
 
 		DisplayMetrics dm = this.getResources().getDisplayMetrics();
 		float fontSizeInPixel = dm.scaledDensity * 23.5f;
-		Typeface font = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
+		/* Let's use custom font */
+		/* Typeface font = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD); */
+		Typeface font = Typeface.createFromAsset(this.getContext().getAssets(),
+				"fonts/Complete in Him.ttf");
+
 		mPaint.setTypeface(font);
 		mPaint.setTextSize(fontSizeInPixel);
 
@@ -115,7 +119,7 @@ public class TextBlurView extends View {
 	protected void onDraw(Canvas canvas) {
 		int x = 0;
 		int y = 0;
-		if (mMouseDownFlag == true) {
+		if (mMouseDownFlag == true && mMouseMovedOutside == false) {
 			x = 2;
 			y = 2;
 		}
@@ -144,11 +148,19 @@ public class TextBlurView extends View {
 		case MotionEvent.ACTION_DOWN:
 			mMouseDownFlag = true;
 			mMouseInside = true;
+			mMouseMovedOutside = false;
 			invalidate();
 			break;
 		case MotionEvent.ACTION_MOVE:
+			boolean oldMousePos = mMouseMovedOutside;
 			if (x < 0 || x > this.getWidth() || y < 0 || y > this.getHeight()) {
 				mMouseInside = false;
+				mMouseMovedOutside = true;
+			} else {
+				mMouseMovedOutside = false;
+			}
+			if(oldMousePos != mMouseMovedOutside) {
+				invalidate();
 			}
 			break;
 		case MotionEvent.ACTION_UP:
@@ -161,6 +173,7 @@ public class TextBlurView extends View {
 			}
 			mMouseDownFlag = false;
 			mMouseInside = false;
+			mMouseMovedOutside = true;
 			invalidate();
 			break;
 		}
