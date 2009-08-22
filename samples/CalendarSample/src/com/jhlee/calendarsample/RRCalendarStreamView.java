@@ -1,6 +1,7 @@
 package com.jhlee.calendarsample;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 
@@ -16,24 +17,30 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.widget.Scroller;
 
-public class CalendarStreamView extends View {
+public class RRCalendarStreamView extends View {
 
 	public static final String TAG = "CalendarStreamView";
 	public static final long ONEDAY_IN_MILLISECONDS = 60 * 60 * 24 * 1000;
 	public static final long ONEWEEK_IN_MILLISECONDS = ONEDAY_IN_MILLISECONDS * 7;
 
-	private static final int COLOR_SUNDAY = Color.rgb(255, 0, 0);
-	private static final int COLOR_SATURDAY = Color.rgb(0, 0, 255);
-	private static final int COLOR_WEEKDAY = Color.BLACK;
-	private static final int COLOR_EVEN_MONTH = Color.rgb(192, 192, 192);
-	private static final int COLOR_ODD_MONTH = Color.rgb(172, 172, 172);
-	private static final int COLOR_FOCUS_BG = Color.BLACK;
+	private static final int COLOR_SUNDAY = Color.rgb(255, 81, 81);
+	private static final int COLOR_SATURDAY = Color.rgb(109, 109, 255);
+	private static final int COLOR_WEEKDAY = Color.WHITE;
+	private static final int COLOR_EVEN_MONTH = Color.rgb(220, 220, 220);
+	private static final int COLOR_ODD_MONTH = Color.rgb(190, 190, 190);
+	private static final int COLOR_FOCUS_BG = Color.rgb(137, 209, 247) | 0x88000000;
 	private static final int COLOR_FOCUS_FG = Color.WHITE;
+
+	private static final int COLOR_SEP_DARK = Color.rgb(150, 150, 150);
+	private static final int COLOR_SEP_BRIGHT = Color.rgb(220, 220, 220);
 
 	private static final int PADDING_DAY_FROM_RIGHT = 3;
 	private static final int PADDING_DAY_FROM_TOP = 3;
+	private static final float SEP_LINE_STROKE_WIDTH = 0.2f;
 
 	/* Base date */
 	private Calendar mBaseDate = new GregorianCalendar(new SimpleTimeZone(0,
@@ -41,7 +48,7 @@ public class CalendarStreamView extends View {
 	/* Base date in milliseconds */
 	private long mBaseDateInMillis = 0;
 	private Calendar mDate = new GregorianCalendar(new SimpleTimeZone(0, "GMT"));
-	private int mWeekHeight = 30;
+	private int mWeekHeight = 60;
 	private int mDayWidth = 0;
 	private int mCurOffset = 0;
 	private final String mNumString[] = new String[] { "1", "2", "3", "4", "5",
@@ -50,7 +57,7 @@ public class CalendarStreamView extends View {
 			"29", "30", "31" };
 	private Paint mPaint;
 	private int mTextHeight = 0;
-	private int mDayTextSize = 13;
+	private int mDayTextSize = 26;
 	private int mYearMonthTextSize = 60;
 
 	private boolean mMouseDownFlag = false;
@@ -68,21 +75,33 @@ public class CalendarStreamView extends View {
 
 	private NinePatch mFocusDateBg;
 
+	
+
+	/**
+	 * Velocity tracker. Used to give fling action.
+	 */
+	private VelocityTracker mVelocityTracker;
+	/**
+	 * Scroller
+	 */
+	private Scroller mScroller;
+	private boolean mIsBegingDragged = false;
+
 	/* Date click listener */
 	private OnClickListener mClickListener = null;
 
 	/** CTOR */
-	public CalendarStreamView(Context ctx) {
+	public RRCalendarStreamView(Context ctx) {
 		super(ctx);
 		initialize();
 	}
 
-	public CalendarStreamView(Context ctx, AttributeSet attrs) {
+	public RRCalendarStreamView(Context ctx, AttributeSet attrs) {
 		super(ctx, attrs);
 		initialize();
 	}
 
-	public CalendarStreamView(Context ctx, AttributeSet attrs, int defStyle) {
+	public RRCalendarStreamView(Context ctx, AttributeSet attrs, int defStyle) {
 		super(ctx, attrs, defStyle);
 		initialize();
 	}
@@ -117,6 +136,11 @@ public class CalendarStreamView extends View {
 		mBaseDateInMillis = mBaseDate.getTimeInMillis();
 
 		moveToToday();
+
+		/*
+		 * Initialize scroller
+		 */
+		mScroller = new Scroller(this.getContext());
 	}
 
 	/**
@@ -155,16 +179,24 @@ public class CalendarStreamView extends View {
 	public void moveToDate(Calendar cal) {
 		int offset = yOffsetFromDate(cal);
 
+		int viewHeight = this.getHeight();
 		/* Is visible? */
-		if ((offset >= mCurOffset) && (offset < mCurOffset + this.getHeight())) {
+//		if ((offset >= mCurOffset) && (offset < mCurOffset + viewHeight)) {
 			/*
 			 * The date is already visible. Hence we do not need to change
 			 * offset
 			 */
-			return;
-		}
+//			return;
+//		}
 
-		mCurOffset = offset;
+		/* Let's make the specified date to be center of 
+		 * screen.
+		 */
+		mCurOffset = offset - viewHeight/2;
+
+		/* Update focused date. */
+		mFocusDateInMillis = cal.getTimeInMillis();
+
 		this.invalidate();
 	}
 
@@ -186,6 +218,12 @@ public class CalendarStreamView extends View {
 		int offset = mCurOffset / mWeekHeight * mWeekHeight;
 		int endOffset = mCurOffset + this.getHeight();
 
+		/* Set painting style */
+		mPaint.setStyle(Paint.Style.FILL);
+
+		/* View width */
+		int viewWidth = this.getWidth();
+
 		/* Initial computation before entering drawing loop. */
 		Calendar cal = this.dateFromYOffset(offset);
 		int nextWeekStartDay = cal.get(Calendar.DAY_OF_MONTH);
@@ -202,6 +240,9 @@ public class CalendarStreamView extends View {
 		int bgColor = 0;
 		long screenY = offset - mCurOffset;
 		for (; offset < endOffset; offset += mWeekHeight, screenY += mWeekHeight) {
+			/* Set style */
+			mPaint.setStyle(Paint.Style.FILL);
+
 			curWeekStartDay = nextWeekStartDay;
 			curWeekMonth = nextWeekMonth;
 			curWeekOfMonth = nextWeekOfMonth;
@@ -234,16 +275,22 @@ public class CalendarStreamView extends View {
 				/* Draw background */
 				drawDayBackground(canvas, 0, (int) screenY, curMonthColor, 0, 7);
 
-				/* Draw year/month information if current week is third one */
-				if (3 == curWeekOfMonth) {
+				/*
+				 * Draw year/month information if current week is third one The
+				 * YEAR/MONTH is displayed as background one.
+				 */
+				boolean isThirdWeek = (3 == curWeekOfMonth);
+				if (isThirdWeek) {
+					installShadow();
 					mPaint.setTextSize(mYearMonthTextSize);
 					mPaint.setColor(nextMonthColor);
 
 					String ymStr = Integer.toString(curYear);
 					ymStr += "." + mNumString[curWeekMonth];
-					canvas.drawText(ymStr, this.getWidth(), screenY
+					canvas.drawText(ymStr, this.getWidth(), screenY - 2
 							+ mWeekHeight, mPaint);
 					mPaint.setTextSize(mDayTextSize);
+					uninstallShadow();
 				}
 				/* Draw day text */
 				drawDayText(canvas, 0, (int) screenY, 0, 7, curWeekStartDay,
@@ -268,18 +315,77 @@ public class CalendarStreamView extends View {
 						curWeekStartDay, false);
 				drawDayText(canvas, xPos, (int) screenY, cnt, 7, 1, false);
 			}
+
+			/* Draw separate line for each row */
+			mPaint.setStrokeWidth(SEP_LINE_STROKE_WIDTH);
+			mPaint.setColor(COLOR_SEP_DARK);
+			mPaint.setStyle(Paint.Style.STROKE);
+			canvas.drawLine(0, screenY, viewWidth, screenY, mPaint);
+			mPaint.setColor(COLOR_SEP_BRIGHT);
+			canvas.drawLine(0, screenY + 1, viewWidth, screenY + 1, mPaint);
 		}
 
 		/* Draw focus area */
+		drawFocusedDate(canvas);
+
+		/* Draw column separate line */
+		mPaint.setStrokeWidth(SEP_LINE_STROKE_WIDTH);
+		mPaint.setStyle(Paint.Style.STROKE);
+		int viewHeight = this.getHeight();
+		for (int colIndex = 1; colIndex < 7; ++colIndex) {
+			int colX = colIndex * mDayWidth;
+			int colNextX = colX + mDayWidth;
+			mPaint.setColor(COLOR_SEP_BRIGHT);
+			canvas.drawLine(colX, 0, colX, viewHeight, mPaint);
+			colX++;
+			mPaint.setColor(COLOR_SEP_DARK);
+			canvas.drawLine(colX, 0, colX, viewHeight, mPaint);
+		}
+
+		/*
+		 * If mouse is down, user cannot see which date is actually picked.
+		 * Let's show the date where user is clicked.
+		 */
+		if (mMouseDownFlag) {
+
+		}
+	}
+
+	/*
+	 * Draw focused date
+	 */
+	private void drawFocusedDate(Canvas canvas) {
+		installShadow();
+
+		mPaint.setStyle(Paint.Style.FILL);
 		mDate.setTimeInMillis(mFocusDateInMillis);
 		int focusDayOfWeek = mDate.get(Calendar.DAY_OF_WEEK) - 1;
 		int y = yOffsetFromDate(mDate) - mCurOffset;
 		int x = (focusDayOfWeek) * mDayWidth;
+
+		Rect focusRect = new Rect();
+		boolean isSaturday = (focusDayOfWeek == 6);
+		if (isSaturday) {
+			focusRect.set(x, y, this.getWidth(), y + mWeekHeight);
+		} else {
+			focusRect.set(x, y, x + mDayWidth, y + mWeekHeight);
+		}
+
 		mPaint.setColor(COLOR_FOCUS_BG);
-		canvas.drawRect(x, y, x + mDayWidth, y + mWeekHeight, mPaint);
+		canvas.drawRect(focusRect, mPaint);
+
 		mPaint.setColor(COLOR_FOCUS_FG);
 		drawDayText(canvas, x, y, focusDayOfWeek, focusDayOfWeek + 1, mDate
 				.get(Calendar.DAY_OF_MONTH), true);
+		uninstallShadow();
+	}
+
+	private void uninstallShadow() {
+		mPaint.setShadowLayer(0.0f, 0, 0, Color.BLACK);
+	}
+
+	private void installShadow() {
+		mPaint.setShadowLayer((float) 2.0, 0, 0, Color.BLACK);
 	}
 
 	/*
@@ -287,6 +393,8 @@ public class CalendarStreamView extends View {
 	 */
 	private int drawDayText(Canvas canvas, int x, int y, int startDayOfWeek,
 			int endDayOfWeek, int startDay, boolean focused) {
+		installShadow();
+
 		/* Draw day text */
 		mPaint.setColor(COLOR_SUNDAY);
 		int right = x + mDayWidth;
@@ -308,6 +416,9 @@ public class CalendarStreamView extends View {
 			x = right;
 			right += mDayWidth;
 		}
+
+		uninstallShadow();
+
 		return x;
 	}
 
@@ -375,6 +486,13 @@ public class CalendarStreamView extends View {
 		super.onSizeChanged(w, h, oldw, oldh);
 
 		mDayWidth = w / 7;
+		
+		/* Make current focus date to center. */
+		Calendar cal = new GregorianCalendar(new SimpleTimeZone(0, "GMT"));
+		cal.clear();
+		cal.setTimeInMillis(mFocusDateInMillis);
+		moveToDate(cal);
+		cal = null;
 	}
 
 	/**
@@ -387,6 +505,10 @@ public class CalendarStreamView extends View {
 
 		switch (e.getAction()) {
 		case MotionEvent.ACTION_DOWN:
+			/* Get velocity tracker */
+			mVelocityTracker = VelocityTracker.obtain();
+			mVelocityTracker.addMovement(e);
+
 			mMouseDownFlag = true;
 			mTouchMovedOverDate = false;
 			mLastPoint.x = x;
@@ -400,6 +522,9 @@ public class CalendarStreamView extends View {
 			break;
 		case MotionEvent.ACTION_MOVE:
 			if (mMouseDownFlag) {
+
+				/* Add movement */
+				mVelocityTracker.addMovement(e);
 
 				int yChanged = mLastPoint.y - y;
 				if (yChanged != 0) {
@@ -419,7 +544,12 @@ public class CalendarStreamView extends View {
 			}
 			break;
 		case MotionEvent.ACTION_UP:
+
 			if (mMouseDownFlag) {
+				/* Compute velocity with millisecond unit. */
+				mVelocityTracker.computeCurrentVelocity(1000);
+				float curVelocity = mVelocityTracker.getXVelocity();
+
 				/* User clicks on date */
 				mHitDateInMillis = hitTest(x, y);
 				if (this.mHitDateInMillis == this.mFocusDateInMillis) {
@@ -431,6 +561,10 @@ public class CalendarStreamView extends View {
 					}
 				}
 			}
+
+			mVelocityTracker.recycle();
+			mVelocityTracker = null;
+
 			mMouseDownFlag = false;
 			mTouchMovedOverDate = false;
 			break;
@@ -447,7 +581,12 @@ public class CalendarStreamView extends View {
 	 */
 	private long hitTest(int x, int y) {
 		Calendar cal = this.dateFromYOffset(y + mCurOffset);
-		return cal.getTimeInMillis() + (x / mDayWidth) * ONEDAY_IN_MILLISECONDS;
+
+		int dayOfWeek = (x / mDayWidth);
+		if (dayOfWeek > 6)
+			dayOfWeek = 6;
+
+		return cal.getTimeInMillis() + dayOfWeek * ONEDAY_IN_MILLISECONDS;
 	}
 
 	/**
@@ -458,5 +597,14 @@ public class CalendarStreamView extends View {
 	public void setClickListener(OnClickListener clickListener) {
 		Assert.assertTrue(clickListener != null);
 		mClickListener = clickListener;
+	}
+
+	/**
+	 * Return selected date
+	 * 
+	 * @return
+	 */
+	public long getSelectedDateInMillis() {
+		return mFocusDateInMillis;
 	}
 }

@@ -18,12 +18,15 @@ public class CalendarSample extends Activity {
         setContentView(R.layout.main);
         
         final Context ctx = this;
-        CalendarStreamView view = (CalendarStreamView)this.findViewById(R.id.calendarStream);
+        RRCalendarStreamView view = (RRCalendarStreamView)this.findViewById(R.id.calendarStream);
         view.setClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Toast.makeText(ctx, R.string.date_is_clicked, Toast.LENGTH_LONG).show();
 			}
         });
+        
+        RRCalendarSelectDialog dlg = new RRCalendarSelectDialog(this);
+        dlg.show();
     }
 }

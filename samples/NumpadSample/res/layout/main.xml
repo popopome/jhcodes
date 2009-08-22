@@ -4,10 +4,13 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-<com.jhlee.calendarsample.RRCalendarStreamView
-	android:id="@+id/calendarStream"
+<TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
     android:text="@string/hello"
+    />
+    <com.jhlee.numpadsample.RRNumpad
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"
     />
 </LinearLayout>

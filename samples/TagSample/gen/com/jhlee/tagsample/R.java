@@ -5,30 +5,29 @@
  * should not be modified by hand.
  */
 
-package com.jhlee.calendarsample;
+package com.jhlee.tagsample;
 
 public final class R {
     public static final class attr {
     }
     public static final class drawable {
-        public static final int calendar_view_todaybg=0x7f020000;
+        public static final int delete_icon=0x7f020000;
         public static final int icon=0x7f020001;
     }
     public static final class id {
-        public static final int LinearLayout01=0x7f050001;
-        public static final int calendarStream=0x7f050000;
-        public static final int calendar_stream_view=0x7f050002;
-        public static final int cancel_button=0x7f050005;
-        public static final int move_to_today=0x7f050003;
-        public static final int select_button=0x7f050004;
+        public static final int tag_add=0x7f050004;
+        public static final int tag_box=0x7f050002;
+        public static final int tag_box_close=0x7f050005;
+        public static final int tag_edit=0x7f050003;
+        public static final int tag_stream_view=0x7f050001;
+        public static final int tag_text_view=0x7f050000;
     }
     public static final class layout {
         public static final int main=0x7f030000;
-        public static final int rr_celendar_select_dialog=0x7f030001;
+        public static final int tagbox=0x7f030001;
     }
     public static final class string {
         public static final int app_name=0x7f040001;
-        public static final int date_is_clicked=0x7f040002;
         public static final int hello=0x7f040000;
     }
 }
