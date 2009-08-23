@@ -1,17 +1,18 @@
 package com.jhlee.tagsample;
 
-import com.jhlee.tagsample.RRTagStreamView.RRTagDataProvider;
-
 import android.content.Context;
-import android.text.Editable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
+import com.jhlee.tagsample.RRTagStreamView.RRTagDataProvider;
+
 public class RRTagBox extends RelativeLayout {
+	private static String TAG = "RRTagBox";
 
 	private Button 	mAddBtn;
 	private Button	mCloseBtn;
@@ -56,8 +57,15 @@ public class RRTagBox extends RelativeLayout {
 					return;
 				
 				/* Add tag with checked status */
-				mTagDataProvider.addTag(text, true);
+				boolean succeeded = mTagDataProvider.addTag(text, true);
+				if(succeeded == false) {
+					Log.e(TAG, "Unable to add tag:" + text);
+					return;
+				}
 				mTagStreamView.refreshTags();
+				
+				/* Clear tag addition view */
+				mNewTagEdit.setText("");
 			}
 		});
 		
@@ -67,7 +75,7 @@ public class RRTagBox extends RelativeLayout {
 		mCloseBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				RRTagBox.this.setVisi
+				RRTagBox.this.setVisibility(GONE);
 			}
 		});
 	}

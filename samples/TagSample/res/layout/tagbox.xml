@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent">
-	<LinearLayout android:orientation="horizontal"
+	<LinearLayout
+		android:id="@+id/tag_commands" 
+		android:orientation="horizontal"
 		android:layout_width="fill_parent" android:layout_height="wrap_content">
 		<EditText
 			android:layout_width="wrap_content"
@@ -25,5 +27,7 @@
 	</LinearLayout>
 	<com.jhlee.tagsample.RRTagStreamView
 		android:id="@+id/tag_stream_view" android:layout_width="fill_parent"
-		android:layout_height="fill_parent" android:layout_alignParentBottom="true" />
+		android:layout_height="wrap_content"
+		android:layout_below="@id/tag_commands" 
+		/>
 </RelativeLayout>

@@ -7,15 +7,11 @@
 	<com.jhlee.tagsample.RRTagTextView
 		android:id="@+id/tag_text_view" android:layout_width="wrap_content"
 		android:layout_height="wrap_content" />
+	<com.jhlee.tagsample.RRTagBox android:id="@+id/tag_box"
+		android:layout_width="fill_parent" android:layout_height="wrap_content" />
 	<com.jhlee.tagsample.RRTagStreamView
-		android:id="@+id/tag_stream_view"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		/>
-	<com.jhlee.tagsample.RRTagBox
-		android:id="@+id/tag_box"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		/>
-		
+		android:id="@+id/tag_stream_view" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" />
+
+
 </LinearLayout>
