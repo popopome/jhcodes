@@ -24,8 +24,7 @@ public class RRMonthBudgetView extends LinearLayout {
 	
 	private ListView mBudgetListView;
 	private RRBudgetDataProvider mProvider;
-	private Paint mPaint;
-	private int mYear;
+		private int mYear;
 	private int mMonth;
 	private int mDesiredWidth;
 	
@@ -38,32 +37,8 @@ public class RRMonthBudgetView extends LinearLayout {
 	public RRMonthBudgetView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		buildLayout();
-		
-		mPaint = new Paint();
-		mPaint.setAntiAlias(true);
-		mPaint.setStrokeWidth(10);
-		mPaint.setColor(Color.WHITE);
-		mPaint.setStyle(Paint.Style.STROKE);
-		
-		DisplayMetrics dm = this.getResources().getDisplayMetrics();
-		float mappedTextSize = (float) (20.0 * dm.scaledDensity); 
-		mPaint.setTextSize(mappedTextSize);
-		
-		Rect rc = new Rect();
-		String guideText = "Click here to add budget";
-		mPaint.getTextBounds(guideText, 0, guideText.length(), rc);
-		mDesiredWidth = rc.width() + PADDING_HORZ + PADDING_HORZ;
-		this.setMinimumWidth(mDesiredWidth);
-		View budgetListView = this.findViewById(R.id.budget_list);
 	}
 
-	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		this.setMeasuredDimension(mDesiredWidth, getMeasuredHeight());
-		
-		
-	}
 
 	private void buildLayout() {
 		createViewsFromLayout(R.layout.rr_month_budget, this);

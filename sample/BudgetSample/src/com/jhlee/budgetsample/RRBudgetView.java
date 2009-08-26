@@ -1,15 +1,23 @@
 package com.jhlee.budgetsample;
 
+import java.util.Calendar;
+
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Gallery;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class RRBudgetView extends LinearLayout {
+	
+	private static final int BASE_YEAR	=	2009;
+	private static final int BASE_MONTH = 1;
 	
 	public interface RRBudgetDataProvider {
 		public int getBudgetCount();
@@ -21,6 +29,9 @@ public class RRBudgetView extends LinearLayout {
 	};
 	
 	private RRBudgetDataProvider mProvider;
+	private LinearLayout	mLayout;
+	private RRMonthBudgetView mMonthBudgetView;
+	private Gallery mYearMonthGallery;
 	
 	public RRBudgetView(Context context) {
 		this(context, null);
@@ -28,13 +39,51 @@ public class RRBudgetView extends LinearLayout {
 	
 	public RRBudgetView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		createViewsFromLayout(R.layout.rr_month_budget, this);
+		mLayout = (LinearLayout) createViewsFromLayout(R.layout.rr_budget_view, this);
+		mMonthBudgetView = (RRMonthBudgetView) mLayout.findViewById(R.id.budget_month);
+		mYearMonthGallery = (Gallery)mLayout.findViewById(R.id.year_month_list);
+		
+		mYearMonthGallery.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> arg0, View arg1,
+					int position, long id) {
+				/* Let's compute year/month from position */
+				int year = BASE_YEAR + position / 12;
+				int month = BASE_MONTH + position % 12;
+				
+				/* View is changed */
+				mMonthBudgetView.setYearMonth(year, month);
+				mMonthBudgetView.setBudgetDataProvider(mProvider);
+				
+				mMonthBudgetView.requestLayout();
+				mMonthBudgetView.invalidate();
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
 	}
 	
+	/*
+	 * Set data provider
+	 */
 	public void setBudgetDataProvider(RRBudgetDataProvider provider) {
 		mProvider = provider;
-		RRMonthBudgetView monthView = (RRMonthBudgetView) findViewById(R.id.budget_month);
-		monthView.setBudgetDataProvider(provider);
+		
+		mMonthBudgetView.setBudgetDataProvider(provider);
+		
+		/* Set current year, month */
+		Calendar cal = Calendar.getInstance();
+		mMonthBudgetView.setYearMonth(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH));
+		mYearMonthGallery.setAdapter(new RRYearMonthAdapter());
+		
+		/* Request layout change */
+		this.requestLayout();
 	}
 
 	private View createViewsFromLayout(int layoutId, ViewGroup parent) {
@@ -73,13 +122,18 @@ public class RRBudgetView extends LinearLayout {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			
-			TextView monthView = new TextView(RRBudgetView.this.getContext());
+			TextView monthTextView = new TextView(RRBudgetView.this.getContext());
+			monthTextView.setPadding(15, 15, 15, 15);
+			
+			DisplayMetrics dm = RRBudgetView.this.getResources().getDisplayMetrics();
+			float textSize = (float) (dm.scaledDensity * 32.00);
+			monthTextView.setTextSize(textSize);
 			
 			int year = BASE_YEAR + position / 12;
 			int month = BASE_MONTH + position % 12;
 			String ymStr = Integer.toString(year) + "." + Integer.toString(month);
-			monthView.setText(ymStr);
-			return monthView;
+			monthTextView.setText(ymStr);
+			return monthTextView;
 		}
 		
 		
