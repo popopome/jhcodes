@@ -1,0 +1,202 @@
+package com.jhlee.budgetsample;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.util.AttributeSet;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+public class RRMonthBudgetView extends LinearLayout {
+
+	public interface RRMonthBudgetDataProvider {
+		public int getYear();
+
+		public int getMonth();
+
+		public int getBudgetCount();
+
+		public long getBudgetAmount(int position);
+
+		public String getBudgetName(int position);
+
+		public long getTotalAmount();
+
+		public boolean deleteBudget(int position);
+
+		public int appendBudget(String budgetName, long totalAmount);
+	};
+	
+
+
+	private ListView mBudgetListView;
+	private RRMonthBudgetDataProvider mProvider;
+	private Paint mPaint;
+
+	public RRMonthBudgetView(Context context) {
+		this(context, null);
+	}
+
+	public RRMonthBudgetView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		buildLayout();
+		
+		mPaint = new Paint();
+		mPaint.setAntiAlias(true);
+		mPaint.setStrokeWidth(10);
+		mPaint.setColor(Color.WHITE);
+		mPaint.setStyle(Paint.Style.STROKE);
+	}
+
+	private void buildLayout() {
+		createViewsFromLayout(R.layout.rr_month_budget, this);
+		mBudgetListView = (ListView) findViewById(R.id.budget_list);
+		
+		/* Item click listener */
+		mBudgetListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+					long arg3) {
+				if(position == 0 || position == 1)
+					return;
+				
+				RRBudgetInputDialog dlg = new RRBudgetInputDialog(RRMonthBudgetView.this.getContext());
+				if(position == 2) {
+					/* Add budget icon is clicked */
+					dlg.show();
+					return;
+				}
+				
+				int dataPosition = (position-3);
+				long amount = mProvider.getBudgetAmount(dataPosition);
+				String budgetName = mProvider.getBudgetName(dataPosition);
+				dlg.editBudget(budgetName, amount);
+				dlg.show();
+			}
+		});
+	}
+
+	private View createViewsFromLayout(int layoutId, ViewGroup parent) {
+		String infService = Context.LAYOUT_INFLATER_SERVICE;
+		LayoutInflater li;
+		li = (LayoutInflater) getContext().getSystemService(infService);
+		return li.inflate(layoutId, parent, true);
+	}
+
+	/*
+	 * Set data provider
+	 */
+	public void setMonthBudgetDataProvider(RRMonthBudgetDataProvider provider) {
+		mProvider = provider;
+		RRMonthBudgetAdapter adapter = new RRMonthBudgetAdapter();
+		mBudgetListView.setAdapter(adapter);
+		requestLayout();
+	}
+
+	/*
+	 * Draw edge line
+	 */
+	@Override
+	protected void onDraw(Canvas canvas) {
+		View pinView = findViewById(R.id.month_pin);
+		int pinH = pinView.getHeight();
+		RectF rect = new RectF();
+		rect.set(0, 0, this.getWidth(), this.getHeight()-pinH);
+		canvas.drawRoundRect(rect, 2.0f, 2.0f, mPaint);
+	}
+
+
+
+	/*
+	 * Basic adapter
+	 */
+	public class RRMonthBudgetAdapter extends BaseAdapter {
+
+		@Override
+		public int getCount() {
+			/*
+			 * 0: Year/Month title 1: Total amount 2: New budget commands
+			 */
+			return mProvider.getBudgetCount() + 3;
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return position;
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup viewGroup) {
+			if (position == 0 || position == 1 || position == 2) {
+				/* Return title */
+				TextView textView = (TextView) createViewsFromLayout(
+						R.layout.rr_month_budget_list_command, null);
+				textView.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL);
+				if (0 == position) {
+					/* Get month/year */
+					int year = mProvider.getYear();
+					int month = mProvider.getMonth();
+					StringBuilder sb = new StringBuilder();
+					sb.append(Integer.toString(year));
+					sb.append(".");
+					sb.append(Integer.toString(month));
+					textView.setText(sb.toString());
+					return textView;
+				}
+				if(1 == position) {
+					long totalMoney = mProvider.getTotalAmount();
+					String moneyStr = "$" + Long.toString(totalMoney/100) + Long.toString(totalMoney%100);
+					textView.setText(moneyStr);
+					return textView;
+				}
+				if(2 == position) {
+					textView.setText("Click here to add budget");
+					textView.setTextSize(20);
+					textView.setPadding(0, 10, 0, 10);
+					return textView;
+				}
+			}
+			
+			/* Generate view for budget */
+			View itemView = createViewsFromLayout(R.layout.rr_month_budget_list_item, null);
+			TextView textView = (TextView) itemView.findViewById(R.id.budget_item_name);
+			TextView budgetAmountView = (TextView)itemView.findViewById(R.id.budget_item_amount);
+			
+			/* Exclude first 3 commands items 
+			 * Set budget name
+			 */
+			int dataPosition = position-3;
+			
+			String budgetName = mProvider.getBudgetName(dataPosition);
+			textView.setText(budgetName);
+			textView.setFocusable(false);
+			textView.setClickable(false);
+			textView.setLongClickable(false);
+			
+			/* Set budget amount */
+			long budgetAmount = mProvider.getBudgetAmount(dataPosition);
+			String budgetAmountString = Long.toString(budgetAmount);
+			budgetAmountView.setText(budgetAmountString);
+			
+			return itemView;
+		}
+
+	}
+
+
+}

@@ -15,21 +15,16 @@
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
 			android:text="edit" />
 	</LinearLayout>
-	<TextView android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:text="Select a budget name from following list:"
-		android:textSize="14.5sp" />
 	<ListView android:id="@+id/budget_recoomends"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:layout_weight="1" />
-			<LinearLayout android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:layout_centerHorizontal="true"
-			android:gravity="center_horizontal">
-			<Button android:id="@+id/ok_button"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:text="OK" />
-			<Button android:id="@+id/cancel_button"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:text="Cancel" />
-		</LinearLayout>
-	
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_centerHorizontal="true"
+		android:gravity="center_horizontal">
+		<Button android:id="@+id/ok_button" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="OK" />
+		<Button android:id="@+id/cancel_button" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="Cancel" />
+	</LinearLayout>
+
 </LinearLayout>

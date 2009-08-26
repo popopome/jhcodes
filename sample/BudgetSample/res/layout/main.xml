@@ -9,4 +9,10 @@
     android:layout_height="wrap_content" 
     android:text="@string/hello"
     />
+    <com.jhlee.budgetsample.RRMonthBudgetView
+    	android:id="@+id/month_budget_view"
+    	android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"
+    >
+    </com.jhlee.budgetsample.RRMonthBudgetView>
 </LinearLayout>
