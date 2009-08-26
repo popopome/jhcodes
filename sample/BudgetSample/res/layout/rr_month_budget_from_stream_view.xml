@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<com.jhlee.budgetsample.RRMonthBudgetView
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/budget_month_wrapper"
+	android:id="@+id/month_budget_view"
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
     android:orientation="vertical"
     >
-    <ListView
-    	android:id="@+id/budget_list"
-    	android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"
-    	>
-	</ListView>
-</LinearLayout>
+</com.jhlee.budgetsample.RRMonthBudgetView>
+

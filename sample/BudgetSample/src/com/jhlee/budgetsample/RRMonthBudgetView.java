@@ -1,11 +1,11 @@
 package com.jhlee.budgetsample;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
+import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,34 +14,22 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.jhlee.budgetsample.RRBudgetView.RRBudgetDataProvider;
 
 public class RRMonthBudgetView extends LinearLayout {
 
-	public interface RRMonthBudgetDataProvider {
-		public int getYear();
-
-		public int getMonth();
-
-		public int getBudgetCount();
-
-		public long getBudgetAmount(int position);
-
-		public String getBudgetName(int position);
-
-		public long getTotalAmount();
-
-		public boolean deleteBudget(int position);
-
-		public int appendBudget(String budgetName, long totalAmount);
-	};
+	private static final int PADDING_HORZ	=	10;
 	
-
-
 	private ListView mBudgetListView;
-	private RRMonthBudgetDataProvider mProvider;
+	private RRBudgetDataProvider mProvider;
 	private Paint mPaint;
+	private int mYear;
+	private int mMonth;
+	private int mDesiredWidth;
+	
+	private RRBudgetItemData mTmpBudgetItemData = new RRBudgetItemData();
 
 	public RRMonthBudgetView(Context context) {
 		this(context, null);
@@ -56,6 +44,25 @@ public class RRMonthBudgetView extends LinearLayout {
 		mPaint.setStrokeWidth(10);
 		mPaint.setColor(Color.WHITE);
 		mPaint.setStyle(Paint.Style.STROKE);
+		
+		DisplayMetrics dm = this.getResources().getDisplayMetrics();
+		float mappedTextSize = (float) (20.0 * dm.scaledDensity); 
+		mPaint.setTextSize(mappedTextSize);
+		
+		Rect rc = new Rect();
+		String guideText = "Click here to add budget";
+		mPaint.getTextBounds(guideText, 0, guideText.length(), rc);
+		mDesiredWidth = rc.width() + PADDING_HORZ + PADDING_HORZ;
+		this.setMinimumWidth(mDesiredWidth);
+		View budgetListView = this.findViewById(R.id.budget_list);
+	}
+
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		this.setMeasuredDimension(mDesiredWidth, getMeasuredHeight());
+		
+		
 	}
 
 	private void buildLayout() {
@@ -77,11 +84,12 @@ public class RRMonthBudgetView extends LinearLayout {
 					return;
 				}
 				
-				int dataPosition = (position-3);
-				long amount = mProvider.getBudgetAmount(dataPosition);
-				String budgetName = mProvider.getBudgetName(dataPosition);
-				dlg.editBudget(budgetName, amount);
 				dlg.show();
+				
+				int dataPosition = (position-3);
+				mProvider.getBudgetItem(mYear, mMonth, dataPosition, mTmpBudgetItemData);
+				dlg.editBudget(mTmpBudgetItemData.mBudgetName,
+							mTmpBudgetItemData.mBudgetAmount);
 			}
 		});
 	}
@@ -94,28 +102,22 @@ public class RRMonthBudgetView extends LinearLayout {
 	}
 
 	/*
+	 * Set year/month data
+	 */
+	public void setYearMonth(int year, int month) {
+		mYear = year;
+		mMonth = month;
+	}
+	
+	/*
 	 * Set data provider
 	 */
-	public void setMonthBudgetDataProvider(RRMonthBudgetDataProvider provider) {
+	public void setBudgetDataProvider(com.jhlee.budgetsample.RRBudgetView.RRBudgetDataProvider provider) {
 		mProvider = provider;
 		RRMonthBudgetAdapter adapter = new RRMonthBudgetAdapter();
 		mBudgetListView.setAdapter(adapter);
 		requestLayout();
 	}
-
-	/*
-	 * Draw edge line
-	 */
-	@Override
-	protected void onDraw(Canvas canvas) {
-		View pinView = findViewById(R.id.month_pin);
-		int pinH = pinView.getHeight();
-		RectF rect = new RectF();
-		rect.set(0, 0, this.getWidth(), this.getHeight()-pinH);
-		canvas.drawRoundRect(rect, 2.0f, 2.0f, mPaint);
-	}
-
-
 
 	/*
 	 * Basic adapter
@@ -149,17 +151,15 @@ public class RRMonthBudgetView extends LinearLayout {
 				textView.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL);
 				if (0 == position) {
 					/* Get month/year */
-					int year = mProvider.getYear();
-					int month = mProvider.getMonth();
 					StringBuilder sb = new StringBuilder();
-					sb.append(Integer.toString(year));
+					sb.append(Integer.toString(mYear));
 					sb.append(".");
-					sb.append(Integer.toString(month));
+					sb.append(Integer.toString(mMonth));
 					textView.setText(sb.toString());
 					return textView;
 				}
 				if(1 == position) {
-					long totalMoney = mProvider.getTotalAmount();
+					long totalMoney = mProvider.getBudgetAmount(mYear, mMonth);
 					String moneyStr = "$" + Long.toString(totalMoney/100) + Long.toString(totalMoney%100);
 					textView.setText(moneyStr);
 					return textView;
@@ -182,15 +182,14 @@ public class RRMonthBudgetView extends LinearLayout {
 			 */
 			int dataPosition = position-3;
 			
-			String budgetName = mProvider.getBudgetName(dataPosition);
-			textView.setText(budgetName);
+			mProvider.getBudgetItem(mYear, mMonth, dataPosition, mTmpBudgetItemData);
+			textView.setText(mTmpBudgetItemData.mBudgetName);
 			textView.setFocusable(false);
 			textView.setClickable(false);
 			textView.setLongClickable(false);
 			
 			/* Set budget amount */
-			long budgetAmount = mProvider.getBudgetAmount(dataPosition);
-			String budgetAmountString = Long.toString(budgetAmount);
+			String budgetAmountString = Long.toString(mTmpBudgetItemData.mBudgetAmount);
 			budgetAmountView.setText(budgetAmountString);
 			
 			return itemView;
