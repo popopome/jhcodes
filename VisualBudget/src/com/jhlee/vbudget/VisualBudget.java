@@ -6,14 +6,23 @@ import android.os.Bundle;
 
 import com.jhlee.vbudget.CommandBar.OnCommandExecuteListener;
 import com.jhlee.vbudget.camera.RRTakeReceiptActivity;
+import com.jhlee.vbudget.db.RRDbAdapter;
 
 public class VisualBudget extends Activity implements OnCommandExecuteListener {
+	/* Db adapter */
+	private RRDbAdapter	mDbAdapter;
+	/* Command bar */
 	private CommandBar mCmdBar;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		/* Initialize Db */
+		mDbAdapter = new RRDbAdapter(this);
+		
+		/* Layout set up */
 		setContentView(R.layout.visual_budget);
 
 		/* Command bar */

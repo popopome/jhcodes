@@ -84,8 +84,10 @@ public class RRCameraPreview extends SurfaceView implements
 			mCamera.setParameters(params);
 		} catch (Exception e) {
 			Log.e(TAG, "Unable to prepare camera");
-			mCamera.release();
-			mCamera = null;
+			if(null != mCamera) {
+				mCamera.release();
+				mCamera = null;
+			}
 
 			/* Show why camera cannot come up */
 			Toast.makeText(this.getContext(),
@@ -95,6 +97,11 @@ public class RRCameraPreview extends SurfaceView implements
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+		if(mCamera == null) {
+			Log.e(TAG, "Camera is not ready");
+			return;
+		}
+		
 		/*
 		 * Now the size is known, set up the camera parameters and begin the
 		 * preview
@@ -106,6 +113,11 @@ public class RRCameraPreview extends SurfaceView implements
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
+		if(mCamera == null) {
+			Log.e(TAG, "camer is not ready");
+			return;
+		}
+		
 		/*
 		 * Surface will be destroyed when we return, so stop the preview.
 		 * Because the CameraDevice object is not a shared resource, it's very

@@ -29,24 +29,47 @@ public final class R {
         public static final int save_button_state=0x7f02000f;
     }
     public static final class id {
-        public static final int ButtonTakeShot=0x7f05000a;
-        public static final int CapturedImageView=0x7f050001;
-        public static final int LinearLayout01=0x7f050002;
-        public static final int RRCaptured=0x7f050000;
-        public static final int RRTakeShot=0x7f050008;
-        public static final int camera_button=0x7f050006;
-        public static final int command_bar=0x7f05000b;
-        public static final int command_list=0x7f050007;
-        public static final int delete_button=0x7f050003;
-        public static final int rotate_button=0x7f050005;
-        public static final int rr_cam_preview=0x7f050009;
-        public static final int save_button=0x7f050004;
+        public static final int ButtonTakeShot=0x7f05001a;
+        public static final int CapturedImageView=0x7f05000b;
+        public static final int LinearLayout01=0x7f05000c;
+        public static final int RRCaptured=0x7f05000a;
+        public static final int RRTakeShot=0x7f050018;
+        public static final int budget_item_amount=0x7f050016;
+        public static final int budget_item_delete_button=0x7f050017;
+        public static final int budget_item_name=0x7f050015;
+        public static final int budget_list=0x7f050013;
+        public static final int budget_list_basic_commands=0x7f050014;
+        public static final int budget_money_change=0x7f050002;
+        public static final int budget_month=0x7f050008;
+        public static final int budget_month_wrapper=0x7f050012;
+        public static final int budget_name=0x7f050000;
+        public static final int budget_recoomends=0x7f050003;
+        public static final int budget_sample_name=0x7f050006;
+        public static final int budget_total=0x7f050001;
+        public static final int budget_view_layout=0x7f050007;
+        public static final int camera_button=0x7f050010;
+        public static final int cancel_button=0x7f050005;
+        public static final int command_bar=0x7f05001b;
+        public static final int command_list=0x7f050011;
+        public static final int delete_button=0x7f05000d;
+        public static final int ok_button=0x7f050004;
+        public static final int rotate_button=0x7f05000f;
+        public static final int rr_cam_preview=0x7f050019;
+        public static final int save_button=0x7f05000e;
+        public static final int view_frame=0x7f05001c;
+        public static final int year_month_list=0x7f050009;
     }
     public static final class layout {
-        public static final int rr_captured=0x7f030000;
-        public static final int rr_command_bar=0x7f030001;
-        public static final int rr_takeshot=0x7f030002;
-        public static final int visual_budget=0x7f030003;
+        public static final int rr_budget_dialog=0x7f030000;
+        public static final int rr_budget_sample_item=0x7f030001;
+        public static final int rr_budget_view=0x7f030002;
+        public static final int rr_captured=0x7f030003;
+        public static final int rr_command_bar=0x7f030004;
+        public static final int rr_month_budget=0x7f030005;
+        public static final int rr_month_budget_list_command=0x7f030006;
+        public static final int rr_month_budget_list_item=0x7f030007;
+        public static final int rr_takeshot=0x7f030008;
+        public static final int visual_budget=0x7f030009;
     }
     public static final class string {
         public static final int app_name=0x7f040001;
