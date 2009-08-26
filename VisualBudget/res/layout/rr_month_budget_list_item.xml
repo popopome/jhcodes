@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content" android:layout_height="wrap_content"
+	android:orientation="horizontal"
+	>
+	<TextView android:id="@+id/budget_item_name"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_weight="1" 
+		android:textSize="20.00sp"
+		/>
+	<TextView android:id="@+id/budget_item_amount"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical" android:shadowColor="#ff000000"
+		android:shadowRadius="2.0" android:textColor="#ffffffff"
+		android:textSize="20.00sp" />
+
+	<Button android:id="@+id/budget_item_delete_button"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:text="delete"
+		android:focusable="false"
+		>
+	</Button>
+</LinearLayout>
+	
