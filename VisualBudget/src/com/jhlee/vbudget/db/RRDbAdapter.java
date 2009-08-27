@@ -4,8 +4,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 
-import com.jhlee.vbudget.util.RRUtil;
-
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -14,9 +13,13 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-public class RRDbAdapter {
+import com.jhlee.vbudget.util.RRUtil;
 
-	private static final int DB_VERSION = 11;
+public class RRDbAdapter {
+	
+	private static final String LOG = "RRDbAdapter";
+
+	private static final int DB_VERSION = 12;
 
 	/* KEYS for RECEIPT TABLE */
 	public static final String KEY_RECEIPT_IMG_FILE = "img_file";
@@ -37,12 +40,36 @@ public class RRDbAdapter {
 	public static final String KEY_PHOTO_TAG_RECEIPT_ID = "receipt_id";
 	public static final int COL_PHOTO_TAG_TAG = 1;
 
+	/* KEYS for BUDGET TABLE */
+	public static final String KEY_BUDGET_ID = "_id";
+	public static final String KEY_BUDGET_YEAR = "year";
+	public static final String KEY_BUDGET_MONTH = "month";
+	public static final String KEY_BUDGET_NAME = "budget_name";
+	public static final String KEY_BUDGET_AMOUNT = "budget_amount";
+	public static final String KEY_BUDGET_BALANCE = "budget_balance";
+
+
+	/* COLS for BUDGET TABLE */
+	public static final int COL_BUDGET_ID = 0;
+	public static final int COL_BUDGET_YEAR = 1;
+	public static final int COL_BUDGET_MONTH = 2;
+	public static final int COL_BUDGET_NAME = 3;
+	public static final int COL_BUDGET_AMOUNT = 4;
+	public static final int COL_BUDGET_BALANCE = 5;
+
+	public static final int COL_BUDGET_MONTH_ITEM_COUNT = 3;
+	public static final int COL_BUDGET_MONTH_AMOUNT_SUM = 4;
+	public static final int COL_BUDGET_MONTH_BALANCE_SUM = 5;
+	public static final int COL_BUDGET_MONTH_MAX_AMOUNT = 6;
+	public static final int COL_BUDGET_MONTH_MIN_AMOUNT = 7;
+
 	private static final String DB_NAME = "RRDB";
 
 	private static final String TABLE_RECEIPT = "receipt";
 	private static final String TABLE_MARKER = "marker";
 	private static final String TABLE_TAG_SOURCE = "tag_source";
 	private static final String TABLE_PHOTO_TAG = "photo_tag";
+	private static final String TABLE_BUDGET = "budget";
 	private static final String RECEIPT_TABLE_CREATE_SQL = "CREATE TABLE receipt("
 			+ " _id INTEGER PRIMARY KEY AUTOINCREMENT, "
 			+ " img_file TEXT NOT NULL,"
@@ -53,6 +80,7 @@ public class RRDbAdapter {
 			+ " taken_day_of_month INTEGER NOT NULL,"
 			+ " geo_coding TEXT, "
 			+ " total INTEGER NOT NULL,"
+			+ " budget_id INTEGER"
 			+ " sync_id INTEGER);";
 	private static final String MARKER_TABLE_CREATE_SQL = "CREATE TABLE marker("
 			+ " marker_id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -63,6 +91,15 @@ public class RRDbAdapter {
 			+ " y INTEGER NOT NULL, "
 			+ " width INTEGER, "
 			+ " height INTEGER);";
+
+	private static final String BUDGET_TABLE_CREATE_SQL = "CREATE TABLE budget("
+			+ " _id INTEGER PRIMARY KEY AUTOINCREMENT, "
+			+ " year INTEGER NOT NULL, "
+			+ " month INTEGER NOT NULL, "
+			+ " budget_name TEXT NOT NULL,"
+			+ " budget_amount INTEGER NOT NULL,"
+			+ " budget_balance INTEGER NOT NULL);";
+
 	/* The table maintains tags which are set by user for specified receipt */
 	private static final String PHOTO_TAGS_TABLE_CREATE_SQL = "CREATE TABLE photo_tag("
 			+ "_id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -78,12 +115,20 @@ public class RRDbAdapter {
 
 	private DbHelper mDbHelper;
 	private SQLiteDatabase mDb;
+	private Activity mOwnerActivity;
 
 	/** CTOR */
 	public RRDbAdapter(Context ctx) {
 		mDbHelper = new DbHelper(ctx);
 		mDb = mDbHelper.getWritableDatabase();
 
+	}
+	
+	/*
+	 * Set owner
+	 */
+	public void setOwner(Activity activity) {
+		mOwnerActivity = activity;
 	}
 
 	/** Insert receipt to database */
@@ -97,9 +142,13 @@ public class RRDbAdapter {
 		long todayInMillis = today.getTimeInMillis();
 		/* Insert date information */
 		vals.put(KEY_RECEIPT_TAKEN_DATE, todayInMillis);
-		vals.put(KEY_RECEIPT_TAKEN_DATE_AS_STRING, RRUtil.formatGMTCalendar(todayInMillis));
-		vals.put(KEY_RECEIPT_TAKEN_DAY_OF_WEEK, today.get(Calendar.DAY_OF_WEEK));
-		vals.put(KEY_RECEIPT_TAKEN_DAY_OF_MONTH, today.get(Calendar.DAY_OF_MONTH));
+		vals.put(KEY_RECEIPT_TAKEN_DATE_AS_STRING, RRUtil
+				.formatGMTCalendar(todayInMillis));
+		vals
+				.put(KEY_RECEIPT_TAKEN_DAY_OF_WEEK, today
+						.get(Calendar.DAY_OF_WEEK));
+		vals.put(KEY_RECEIPT_TAKEN_DAY_OF_MONTH, today
+				.get(Calendar.DAY_OF_MONTH));
 
 		/**
 		 * Set total money as zero. 0 means N/A.
@@ -115,8 +164,11 @@ public class RRDbAdapter {
 				"COUNT(*) AS CNT", "SUM(TOTAL) AS TOTAL_EXPENSE",
 				KEY_RECEIPT_IMG_FILE, KEY_RECEIPT_TAKEN_DATE }, null, null,
 				KEY_RECEIPT_TAKEN_DATE_AS_STRING, null, KEY_RECEIPT_TAKEN_DATE);
-		if (c != null)
+		if (c != null) {
 			c.moveToFirst();
+			mOwnerActivity.startManagingCursor(c);
+		}
+		
 		return c;
 	}
 
@@ -130,8 +182,10 @@ public class RRDbAdapter {
 	public Cursor queryReceipt(int rid) {
 		Cursor c = mDb.query(TABLE_RECEIPT, null, "_id=" + rid, null, null,
 				null, null);
-		if (c != null)
+		if (c != null) {
 			c.moveToFirst();
+			mOwnerActivity.startManagingCursor(c);
+		}
 
 		return c;
 	}
@@ -142,8 +196,11 @@ public class RRDbAdapter {
 	 * @return Cursor
 	 */
 	public Cursor queryAllReceipts() {
-		return mDb.query(TABLE_RECEIPT, null, null, null, null, null,
+		Cursor c = mDb.query(TABLE_RECEIPT, null, null, null, null, null,
 				KEY_RECEIPT_TAKEN_DATE);
+		if(c != null)
+			mOwnerActivity.startManagingCursor(c);
+		return c;
 	}
 
 	/**
@@ -177,9 +234,12 @@ public class RRDbAdapter {
 
 		/* Insert date to DB */
 		vals.put(KEY_RECEIPT_TAKEN_DATE, tmpCalendar.getTimeInMillis());
-		vals.put(KEY_RECEIPT_TAKEN_DATE_AS_STRING, RRUtil.formatGMTCalendar(tmpCalendar.getTimeInMillis()));
-		vals.put(KEY_RECEIPT_TAKEN_DAY_OF_WEEK, tmpCalendar.get(Calendar.DAY_OF_WEEK));
-		vals.put(KEY_RECEIPT_TAKEN_DAY_OF_MONTH, tmpCalendar.get(Calendar.DAY_OF_MONTH));
+		vals.put(KEY_RECEIPT_TAKEN_DATE_AS_STRING, RRUtil
+				.formatGMTCalendar(tmpCalendar.getTimeInMillis()));
+		vals.put(KEY_RECEIPT_TAKEN_DAY_OF_WEEK, tmpCalendar
+				.get(Calendar.DAY_OF_WEEK));
+		vals.put(KEY_RECEIPT_TAKEN_DAY_OF_MONTH, tmpCalendar
+				.get(Calendar.DAY_OF_MONTH));
 
 		/* Assume 0th index is id */
 		int rid = cursor.getInt(0);
@@ -361,11 +421,14 @@ public class RRDbAdapter {
 	}
 
 	public long getMaxExpenseAmongEachDays() {
-		Cursor cursor = mDb.query("(select max(total) as accum from receipt group by taken_date_as_string)", 
-				new String[]{"max(accum)"}, null, null, null, null, null, null);
+		Cursor cursor = mDb
+				.query(
+						"(select max(total) as accum from receipt group by taken_date_as_string)",
+						new String[] { "max(accum)" }, null, null, null, null,
+						null, null);
 		if (null == cursor)
 			return 0;
-		
+
 		long val = 0;
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
@@ -377,20 +440,93 @@ public class RRDbAdapter {
 
 	public Cursor queryExpenseDayByDay() {
 		Cursor cursor = mDb.query(TABLE_RECEIPT, new String[] { "taken_date",
-				"sum(total)" }, null, null, KEY_RECEIPT_TAKEN_DATE_AS_STRING, null, KEY_RECEIPT_TAKEN_DATE);
+				"sum(total)" }, null, null, KEY_RECEIPT_TAKEN_DATE_AS_STRING,
+				null, KEY_RECEIPT_TAKEN_DATE);
+		if(cursor != null) {
+			cursor.moveToFirst();
+			mOwnerActivity.startManagingCursor(cursor);
+		}
 		return cursor;
 	}
+
 	public Cursor queryExpenseDayOfWeek() {
-		Cursor cursor = mDb.query(TABLE_RECEIPT, new String[] { "taken_day_of_week",
-				"sum(total)" }, null, null, KEY_RECEIPT_TAKEN_DAY_OF_WEEK, null, KEY_RECEIPT_TAKEN_DAY_OF_WEEK);
+		Cursor cursor = mDb.query(TABLE_RECEIPT, new String[] {
+				"taken_day_of_week", "sum(total)" }, null, null,
+				KEY_RECEIPT_TAKEN_DAY_OF_WEEK, null,
+				KEY_RECEIPT_TAKEN_DAY_OF_WEEK);
+	
+		if(cursor != null) {
+			cursor.moveToFirst();
+			mOwnerActivity.startManagingCursor(cursor);
+		}
 		return cursor;
 	}
-	
+
 	public Cursor queryMostExpensiveExpense() {
 		Cursor cursor = mDb.query(TABLE_RECEIPT, null,
-				"total = (select max(total) from receipt)",
-				null, null, null, null);
+				"total = (select max(total) from receipt)", null, null, null,
+				null);
+		if(cursor != null) {
+			cursor.moveToFirst();
+			mOwnerActivity.startManagingCursor(cursor);
+		}
 		return cursor;
+	}
+
+	public Cursor queryAllBudgetItems() {
+		Cursor c = mDb.query(TABLE_BUDGET, null, null, null, null, null,
+				"year, month, budget_name");
+		if(c != null) {
+			c.moveToFirst();
+			mOwnerActivity.startManagingCursor(c);
+		}
+		return c;
+	}
+
+	public Cursor queryMonthBudgets() {
+		Cursor c = mDb.query(TABLE_BUDGET, new String[] { "_id", "year",
+				"month", "count(_id)", "sum(budget_amount)", "sum(budget_balance)",
+				"max(budget_amount)", "max(budget_balance)" }, null, null,
+				"year, month", null, "year, month");
+		return c;
+	}
+	
+	public boolean insertBudgetItem(
+			int year, 
+			int month,
+			String name,
+			long amount)  {
+		ContentValues vals = new ContentValues();
+		vals.put("year", year);
+		vals.put("month", month);
+		vals.put("budget_name", name);
+		vals.put("budget_amount", amount);
+		vals.put("budget_balance", amount);
+		
+		mDb.insert(TABLE_RECEIPT, null, vals);
+		return true;
+	}
+	
+	public boolean removeBudgetItem(int id) {
+		int rowCnt = mDb.delete(TABLE_BUDGET, "_id=" + id, null);
+		if(rowCnt != 1) {
+			Log.e(LOG, "Unable to delete budget");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean updateBudgetItem(int id, String budgetName, long budgetAmount) {
+		ContentValues vals = new ContentValues();
+		vals.put("budget_name", budgetName);
+		vals.put("budget_amount", budgetAmount);
+		int rowCnt = mDb.update(TABLE_BUDGET, vals, "_id=" + id, null);
+		if(1 != rowCnt) {
+			Log.e(TAG, "Unable to update budget:id=" + id);
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -413,6 +549,7 @@ public class RRDbAdapter {
 			db.execSQL(MARKER_TABLE_CREATE_SQL);
 			db.execSQL(PHOTO_TAGS_TABLE_CREATE_SQL);
 			db.execSQL(TAG_SOURCE_TABLE_CREATE_SQL);
+			db.execSQL(BUDGET_TABLE_CREATE_SQL);
 		}
 
 		@Override
@@ -424,6 +561,7 @@ public class RRDbAdapter {
 			db.execSQL("DROP TABLE IF EXISTS marker");
 			db.execSQL("DROP TABLE IF EXISTS photo_tag");
 			db.execSQL("DROP TABLE IF EXISTS tag_source");
+			db.execSQL("DROP TABLE IF EXISTS budget");
 
 			this.onCreate(db);
 		}

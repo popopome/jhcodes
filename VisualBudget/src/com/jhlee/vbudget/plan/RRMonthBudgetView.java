@@ -12,7 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.jhlee.rr.RRBudgetView.RRBudgetDataProvider;
+import com.jhlee.vbudget.R;
+import com.jhlee.vbudget.plan.RRBudgetView.RRBudgetDataProvider;
 
 public class RRMonthBudgetView extends LinearLayout {
 
@@ -99,7 +100,7 @@ public class RRMonthBudgetView extends LinearLayout {
 			/*
 			 * 0: Year/Month title 1: Total amount 2: New budget commands
 			 */
-			return mProvider.getBudgetCount() + 3;
+			return mProvider.getBudgetMonthCount() + 3;
 		}
 
 		public Object getItem(int position) {

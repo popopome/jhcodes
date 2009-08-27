@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="solid_white">#ffffffff</drawable>
+    <drawable name="semitransparent_bg">#7f666666</drawable>
+    <drawable name="clr_transparent">#00ffffff</drawable>
+    <drawable name="semi_gray">#aa333333</drawable>
+</resources>

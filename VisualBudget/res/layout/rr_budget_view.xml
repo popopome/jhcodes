@@ -6,7 +6,7 @@
     android:layout_height="fill_parent" 
     android:orientation="vertical"
     >
-    <com.jhlee.budgetsample.RRMonthBudgetView
+    <com.jhlee.vbudget.plan.RRMonthBudgetView
     	android:id="@+id/budget_month"
     	android:layout_width="fill_parent"
     	android:layout_height="wrap_content"

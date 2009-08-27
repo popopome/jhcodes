@@ -22,7 +22,8 @@ public class RRBudgetView extends LinearLayout {
 	private static final int BASE_MONTH = 1;
 	
 	public interface RRBudgetDataProvider {
-		public int getBudgetCount();
+		public void refreshData();
+		public int getBudgetMonthCount();
 		public long getBudgetAmount(int year, int month);
 		public boolean getBudgetItem(int year, int month, int position, RRBudgetItemData budgetData);
 		public int getBudgetItemCount(int year, int month);
@@ -87,6 +88,15 @@ public class RRBudgetView extends LinearLayout {
 		LayoutInflater li;
 		li = (LayoutInflater) getContext().getSystemService(infService);
 		return li.inflate(layoutId, parent, true);
+	}
+	
+	/*
+	 * Refresh data
+	 */
+	public void refreshData()
+	{
+		if(mProvider != null)
+			mProvider.refreshData();
 	}
 	
 	private class RRYearMonthAdapter extends BaseAdapter {
