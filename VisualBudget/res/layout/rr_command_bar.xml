@@ -1,19 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-    <Button
-    	android:id="@+id/camera_button"
-    	android:layout_width="wrap_content" 
-    	android:layout_height="wrap_content"
-    	android:text="Camera"
-    	/>
-    <com.jhlee.vbudget.CommandScrollList
-    	android:id="@+id/command_list"
-    	android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"
-    	/>
+
+<Gallery android:id="@+id/command_list" xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="wrap_content">
+</Gallery>
     	
-</LinearLayout>
+

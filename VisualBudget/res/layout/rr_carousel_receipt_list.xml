@@ -4,10 +4,10 @@
 	android:layout_width="fill_parent" android:layout_height="fill_parent">
 
 
-	<com.jhlee.rr.RRCarouselFlowView
+	<com.jhlee.vbudget.expense.RRCarouselFlowView
 		android:id="@+id/carouselView" android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:focusable="true">
-	</com.jhlee.rr.RRCarouselFlowView>
+	</com.jhlee.vbudget.expense.RRCarouselFlowView>
 
 	<Button android:id="@+id/back_button" android:layout_width="wrap_content"
 		android:layout_height="wrap_content" android:background="@drawable/back_button_state"
@@ -33,7 +33,7 @@
 
 		android:layout_alignParentBottom="true"></Button>
 
-	<com.jhlee.rr.RRTagBox android:id="@+id/tag_box"
+	<com.jhlee.vbudget.expense.RRTagBox android:id="@+id/tag_box"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:visibility="invisible"
 		android:layout_alignParentBottom="true"

@@ -23,6 +23,8 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.jhlee.vbudget.R;
+import com.jhlee.vbudget.VisualBudget;
+import com.jhlee.vbudget.VisualBudget.RRMoneyContentHost;
 import com.jhlee.vbudget.db.RRDbAdapter;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.OnCarouselActiveItemChanged;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.OnCarouselActiveItemClickListener;
@@ -38,6 +40,7 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	private RRCarouselFlowView mCarouselView;
 	private RRDbAdapter mAdapter;
 	private Cursor mCursor;
+	private RRMoneyContentHost mHost;
 	private HashMap<String, Bitmap> mBmpPool = new HashMap<String, Bitmap>();
 
 	private Matrix mMatrixZoomToFit = new Matrix();
@@ -245,6 +248,10 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 			}
 		});
 	}
+	
+	public void setMoneyContentHost(RRMoneyContentHost host) {
+		mHost = host;
+	}
 
 	public void refreshData() {
 		if (mCursor != null) {
@@ -280,6 +287,9 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		 * i.putExtra(RRReceiptDetailActivity.RECEIPT_ID, rid);
 		 * this.startActivity(i);
 		 */
+		if(mHost != null) {
+			mHost.showMoneyContent(VisualBudget.RR_CMD_DETAIL_EXPENSE, rid, null);
+		}
 	}
 
 	/*

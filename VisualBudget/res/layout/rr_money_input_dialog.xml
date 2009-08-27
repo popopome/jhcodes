@@ -13,8 +13,8 @@
 		android:textColorHint="#ff777777"
 		android:layout_marginRight="14.5sp"
 		/>
-	<com.jhlee.rr.RRNumpad
+	<com.jhlee.vbudget.expense.RRNumpad
 		android:id="@+id/numpad" android:layout_width="fill_parent"
 		android:layout_height="fill_parent">
-	</com.jhlee.rr.RRNumpad>
+	</com.jhlee.vbudget.expense.RRNumpad>
 </LinearLayout>

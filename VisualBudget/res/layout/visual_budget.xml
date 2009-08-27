@@ -2,8 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
-	<com.jhlee.vbudget.CommandBar android:id="@+id/command_bar"
-		android:layout_width="fill_parent" android:layout_height="wrap_content" />
+	<com.jhlee.vbudget.RRCommandBar android:id="@+id/command_bar"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:padding="14sp" 
+		/>
 	<FrameLayout android:id="@+id/view_frame"
 		android:layout_width="fill_parent" android:layout_height="fill_parent">
 	</FrameLayout>

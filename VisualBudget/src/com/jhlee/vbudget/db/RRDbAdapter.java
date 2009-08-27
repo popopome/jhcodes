@@ -472,6 +472,20 @@ public class RRDbAdapter {
 		}
 		return cursor;
 	}
+	
+	/*
+	 * Query latest expense id 
+	 */
+	public int queryLatestExpenseId() {
+		Cursor c = mDb.query(TABLE_RECEIPT, new String[] { "_id" }, null, null, null, null, "taken_date desc");
+		if(null == c) {
+			return -1;
+		}
+		c.moveToFirst();
+		int expenseId = c.getInt(0);
+		c.close();
+		return expenseId;
+	}
 
 	public Cursor queryAllBudgetItems() {
 		Cursor c = mDb.query(TABLE_BUDGET, null, null, null, null, null,
@@ -490,6 +504,8 @@ public class RRDbAdapter {
 				"year, month", null, "year, month");
 		return c;
 	}
+	
+	
 	
 	public boolean insertBudgetItem(
 			int year, 

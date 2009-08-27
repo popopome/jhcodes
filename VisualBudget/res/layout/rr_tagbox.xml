@@ -20,7 +20,7 @@
 			android:layout_height="wrap_content" android:text="Close" />
 
 	</LinearLayout>
-	<com.jhlee.rr.RRTagStreamView android:id="@+id/tag_stream_view"
+	<com.jhlee.vbudget.expense.RRTagStreamView android:id="@+id/tag_stream_view"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:layout_below="@id/tag_commands" />
 </RelativeLayout>
