@@ -1,4 +1,4 @@
-package com.jhlee.vbudget.camera;
+package com.jhlee.vbudget.collect;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,7 +43,7 @@ public class RRTakeReceiptActivity extends Activity implements RRCameraPreview.O
 		/* Full screen */
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		this.setContentView(R.layout.rr_takeshot);
+		this.setContentView(R.layout.collect_takeshot);
 		
 		/* Get preview object */
 		final RRCameraPreview preview = (RRCameraPreview)findViewById(R.id.rr_cam_preview);

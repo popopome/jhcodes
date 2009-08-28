@@ -12,7 +12,6 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.GestureDetector.SimpleOnGestureListener;
 
 public class RRTagTextView extends View {
 	private static Bitmap mDeleteBmp = null;
@@ -32,6 +31,11 @@ public class RRTagTextView extends View {
 	private boolean mChecked = false;
 	private boolean mTrackMouse = false;
 	private boolean mShowDeleteMark = false;
+
+	private int mMinX;
+	private int mMinY;
+	private int mMaxX;
+	private int mMaxY;
 
 	public RRTagTextView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -59,9 +63,13 @@ public class RRTagTextView extends View {
 		}
 	}
 
-	public void setText(String text) {
+	public void setTagText(String text) {
 		mText = text;
 		this.requestLayout();
+	}
+
+	public String getTagText() {
+		return mText;
 	}
 
 	/**
@@ -115,6 +123,7 @@ public class RRTagTextView extends View {
 	public void toggleCheck() {
 		mChecked = !mChecked;
 	}
+
 	public void check() {
 		mChecked = true;
 	}
@@ -131,9 +140,59 @@ public class RRTagTextView extends View {
 		mShowDeleteMark = false;
 	}
 
-
 	public boolean isChecked() {
 		return mChecked;
+	}
+
+	/*
+	 * Check view has same tag
+	 */
+	public boolean hasSameTag(String tag) {
+		return 0 == tag.compareTo(mText);
+	}
+
+	/*
+	 * Do nothing
+	 */
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		int x = (int) event.getX();
+		int y = (int) event.getY();
+
+		switch (event.getAction()) {
+		case MotionEvent.ACTION_DOWN:
+			mMinX = x;
+			mMinY = y;
+			mMaxX = x;
+			mMaxY = y;
+			mTrackMouse = true;
+			invalidate();
+			break;
+		case MotionEvent.ACTION_MOVE:
+			if (mTrackMouse == true) {
+				mMinX = Math.min(mMinX, x);
+				mMinY = Math.min(mMinY, y);
+				mMaxX = Math.max(mMaxX, x);
+				mMaxY = Math.max(mMaxY, y);
+			}
+			break;
+		case MotionEvent.ACTION_UP:
+			if (mTrackMouse == true) {
+				int movementX = mMaxX - mMinX;
+				int movementY = mMaxY - mMinY;
+				if (movementX < 30 && movementY < 30) {
+					toggleCheck();
+				}
+				invalidate();
+			}
+
+			mTrackMouse = false;
+			break;
+		default:
+			return false;
+		}
+		/* Consumed */
+		return true;
 	}
 
 }

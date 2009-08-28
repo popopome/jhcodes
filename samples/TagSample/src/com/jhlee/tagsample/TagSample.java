@@ -2,10 +2,10 @@ package com.jhlee.tagsample;
 
 import java.util.ArrayList;
 
-import com.jhlee.tagsample.RRTagStreamView.RRTagDataProvider;
-
 import android.app.Activity;
 import android.os.Bundle;
+
+import com.jhlee.tagsample.RRTagStreamView.RRTagDataProvider;
 
 public class TagSample extends Activity {
 	
@@ -21,11 +21,17 @@ public class TagSample extends Activity {
 			mTags.add("google");
 			mTags.add("apple");
 			mTags.add("microsoft");
-		
-			mCheckTable.add(0);
-			mCheckTable.add(0);
-			mCheckTable.add(0);
-			mCheckTable.add(0);
+			mTags.add("windows mobile");
+			mTags.add("palm pre");
+			mTags.add("iPhone");
+			mTags.add("blackberry");
+			mTags.add("rim");
+			mTags.add("amazon");
+			
+			int cnt = mTags.size();
+			for(int i=0;i<cnt;++i) {
+				mCheckTable.add(0);
+			}
 		}
 
 		@Override
@@ -60,6 +66,18 @@ public class TagSample extends Activity {
 			mCheckTable.add(checked ? 1 : 0);
 			return true;
 		}
+
+		@Override
+		public int findTag(String tagName) {
+			int cnt = mTags.size();
+			for(int pos=cnt-1;pos>=0;--pos) {
+				if(0 == tagName.compareToIgnoreCase(mTags.get(pos))) {
+					return pos;
+				}
+			}
+			
+			return -1;
+		}
 		
 	};
 	
@@ -70,15 +88,17 @@ public class TagSample extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
+        /*
         RRTagTextView textView = (RRTagTextView)findViewById(R.id.tag_text_view);
-        textView.setText("This is tag view");
+        textView.setTagText("This is tag view");
         textView.showDeleteMark();
         
         RRTagStreamView stmView = (RRTagStreamView)findViewById(R.id.tag_stream_view);
         stmView.setTagProvider(mTagProvider);
         
         RRTagBox tagBox = (RRTagBox)findViewById(R.id.tag_box);
-        tagBox.setTagProvider(mTagProvider);
+        tagBox.setTagProvider(mTagProvider);*/
+        RRTagsListView gridView = (RRTagsListView)findViewById(R.id.tags_grid_view);
+        gridView.initialize(mTagProvider);
     }
 }

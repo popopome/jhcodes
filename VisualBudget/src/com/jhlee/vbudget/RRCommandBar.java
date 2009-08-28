@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -17,6 +18,8 @@ import android.widget.TextView;
 import com.jhlee.vbudget.util.RRUtil;
 
 public class RRCommandBar extends LinearLayout {
+	private static final String	TAG = "RRCommandBar";
+	
 	public interface OnCommandExecuteListener {
 		public void onCommandExecute(int cmdId, String cmdLabel);
 	}
@@ -78,6 +81,28 @@ public class RRCommandBar extends LinearLayout {
 	 */
 	public void updatedCommandSpecs() {
 		mCommandList.setAdapter(new RRCommandListAdapter());
+	}
+	
+	/*
+	 * Set active command
+	 * Make the view which has given command id as selected one.
+	 */
+	public void setActiveCommand(int cmdId) {
+		/* Find position by cmd Id */
+		ArrayList<RRCommandSpec> s = mCommandSpecs;
+		int cnt = s.size();
+		int pos = 0;
+		for(; pos <cnt; ++pos) {
+			if(s.get(pos).mCmdId == cmdId) {
+				break;
+			}
+		}
+		if(pos == cnt) {
+			Log.e(TAG, "Not found command:cmdId=" + cmdId);
+			return;
+		}
+		
+		mCommandList.setSelection(pos, true);
 	}
 	
 	/**

@@ -40,6 +40,9 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	private RRCarouselFlowView mCarouselView;
 	private RRDbAdapter mAdapter;
 	private Cursor mCursor;
+	/*
+	 * Content host
+	 */
 	private RRMoneyContentHost mHost;
 	private HashMap<String, Bitmap> mBmpPool = new HashMap<String, Bitmap>();
 
@@ -249,7 +252,11 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		});
 	}
 	
+	/*
+	 * Set money content host
+	 */
 	public void setMoneyContentHost(RRMoneyContentHost host) {
+		Assert.assertTrue(host != null);
 		mHost = host;
 	}
 

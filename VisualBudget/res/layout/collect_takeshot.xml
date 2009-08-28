@@ -2,7 +2,7 @@
 <RelativeLayout android:id="@+id/RRTakeShot"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	xmlns:android="http://schemas.android.com/apk/res/android">
-	<com.jhlee.vbudget.camera.RRCameraPreview
+	<com.jhlee.vbudget.collect.RRCameraPreview
 		android:id="@+id/rr_cam_preview"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"

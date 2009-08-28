@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import junit.framework.Assert;
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,7 +12,7 @@ import android.view.Window;
 import android.widget.FrameLayout;
 
 import com.jhlee.vbudget.RRCommandBar.OnCommandExecuteListener;
-import com.jhlee.vbudget.camera.RRTakeReceiptActivity;
+import com.jhlee.vbudget.collect.RRCollectView;
 import com.jhlee.vbudget.db.RRDbAdapter;
 import com.jhlee.vbudget.expense.RRDailyExpenseCarouselView;
 import com.jhlee.vbudget.expense.RRDetailExpenseView;
@@ -24,8 +23,9 @@ import com.jhlee.vbudget.statistics.RRStatisticsView;
 public class VisualBudget extends Activity implements OnCommandExecuteListener {
 	private static final String TAG = "VisualBudget";
 
-	public static final int RR_CMD_CAMERA = 1;
-	public static final int RR_CMD_HOME = 2;
+	
+	public static final int RR_CMD_OVERVIEW = 1;
+	public static final int RR_CMD_COLLECT = 2;
 	public static final int RR_CMD_PLAN = 3;
 	public static final int RR_CMD_DAILY_EXPENSE_CAROUSEL = 4;
 	public static final int RR_CMD_DETAIL_EXPENSE = 5;
@@ -38,7 +38,8 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 	/* Frame */
 	private FrameLayout mContentFrame;
 
-	private RRMoneyContentHost mContentHost;
+	/* Content host */
+	private RRMoneyContentHost mContentHost = new RRMoneyContentHost();
 
 	/* Active view index */
 	private int mActiveViewIndex = -1;
@@ -64,10 +65,10 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 		mCmdBar = (RRCommandBar) findViewById(R.id.command_bar);
 		mCmdBar.setOnCommandExecuteListener(this);
 
-		int[] cmdIds = new int[] { RR_CMD_CAMERA, RR_CMD_HOME, RR_CMD_PLAN,
+		int[] cmdIds = new int[] { RR_CMD_OVERVIEW, RR_CMD_COLLECT, RR_CMD_PLAN,
 				RR_CMD_DAILY_EXPENSE_CAROUSEL, RR_CMD_DETAIL_EXPENSE,
 				RR_CMD_STATISTICS };
-		String[] cmdLabels = new String[] { "Camera", "Home", "Plan",
+		String[] cmdLabels = new String[] { "Overview", "Collect", "Plan",
 				"Carousel", "Deatail", "Statistics" };
 		int cnt = cmdIds.length;
 		for (int i = 0; i < cnt; ++i) {
@@ -90,9 +91,9 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 
 	private void performCommand(int cmdId, String cmdLabel, Object param) {
 		switch (cmdId) {
-		case RR_CMD_CAMERA: {
-			Intent i = new Intent(this, RRTakeReceiptActivity.class);
-			this.startActivity(i);
+		case RR_CMD_COLLECT: {
+			this.setMoneyContent(getCollectView(cmdId, cmdLabel));
+			
 		}
 			break;
 		case RR_CMD_PLAN:
@@ -110,9 +111,19 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 			break;
 		}
 	}
-
 	
-	
+	/*
+	 * Get collect view
+	 */
+	private View getCollectView(int cmdId, String cmdLabel) {
+		/* Find plan content view */
+		RRCollectView collectView = (RRCollectView) mContentViewPool.get(cmdId);
+		if (null == collectView) {
+			collectView = new RRCollectView(this);
+			mContentViewPool.put(cmdId, collectView);
+		}
+		return collectView;
+	}
 
 	/*
 	 * Get plan view
@@ -131,7 +142,7 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 		}
 		return budgetView;
 	}
-	
+
 	/*
 	 * Carousel expense view
 	 */
@@ -139,6 +150,7 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 		RRDailyExpenseCarouselView carouselView = (RRDailyExpenseCarouselView) mContentViewPool
 				.get(cmdId);
 		if (null == carouselView) {
+			/* Create carousel view */
 			carouselView = new RRDailyExpenseCarouselView(this);
 			if (false == carouselView.initializeViews(mDbAdapter)) {
 				Log.e(TAG, "Unable to initialize carousel view");
@@ -152,49 +164,56 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 
 		return carouselView;
 	}
-	
+
 	/*
 	 * Get detail view
 	 */
 	private View getDetailView(int cmdId, String cmdLabel, Object param) {
-		
+
 		/*
-		 * If expense id is not given,
-		 * here the program uses latest expense.
+		 * If expense id is not given, here the program uses latest expense.
 		 */
 		Integer expenseId;
-		if(null == param) {
+		if (null == param) {
 			expenseId = mDbAdapter.queryLatestExpenseId();
-			if(-1 == expenseId) {
+			if (-1 == expenseId) {
 				/* TODO: return empty view. */
 				return null;
 			}
 		} else {
-			expenseId = (Integer)param;
+			/*
+			 * ?? I don't know java well. Following code is somewhat silly.
+			 */
+			long val = (Long) param;
+			expenseId = (int) val;
 		}
-		
-		RRDetailExpenseView detailView = (RRDetailExpenseView) mContentViewPool.get(cmdId);
-		if(null == detailView) {
+
+		RRDetailExpenseView detailView = (RRDetailExpenseView) mContentViewPool
+				.get(cmdId);
+		if (null == detailView) {
 			detailView = new RRDetailExpenseView(this);
 			mContentViewPool.put(cmdId, detailView);
 		}
-		
+
 		detailView.setExpense(mDbAdapter, expenseId);
 		return detailView;
 	}
-	
-	private View getStatisticsView(int cmdId, String cmdLabel)
-	{
-		RRStatisticsView statView = (RRStatisticsView) mContentViewPool.get(cmdId);
-		if(null == statView) {
+
+	/*
+	 * Statistics view
+	 */
+	private View getStatisticsView(int cmdId, String cmdLabel) {
+		RRStatisticsView statView = (RRStatisticsView) mContentViewPool
+				.get(cmdId);
+		if (null == statView) {
 			statView = new RRStatisticsView(this);
 			statView.setUp(mDbAdapter);
-			
+
 			mContentViewPool.put(cmdId, statView);
 		}
-		
+
 		statView.refreshData();
-		
+
 		return statView;
 	}
 
@@ -211,13 +230,18 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 				/* View is already active */
 				return;
 			}
+		}
 
-			/* Make previous view as gone. */
+		/* Make previous view as gone. 
+		 * If mActiveViewIndex == -1, there is no active view index
+		 */
+		if(mActiveViewIndex != -1) {
 			View prevView = mContentFrame.getChildAt(mActiveViewIndex);
 			if (prevView.hasFocus())
 				prevView.clearFocus();
-			prevView.setVisibility(View.GONE);
+			prevView.setVisibility(View.GONE);	
 		}
+		
 
 		/*
 		 * Check view has parent or not. If it has parent, then we consider the
@@ -227,7 +251,7 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 			mContentFrame.addView(view, new ViewGroup.LayoutParams(
 					ViewGroup.LayoutParams.FILL_PARENT,
 					ViewGroup.LayoutParams.FILL_PARENT));
-			mActiveViewIndex = mContentFrame.getChildCount() - 1;
+			mActiveViewIndex = mContentFrame.indexOfChild(view);
 		} else {
 			/*
 			 * We know view has parent and the parent should be mContentFrame.
@@ -257,6 +281,9 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 	public class RRMoneyContentHost {
 		public void showMoneyContent(int command, Object param1, Object param2) {
 			VisualBudget.this.performCommand(command, "MoneyMoney", param1);
+
+			/* Change command button */
+			mCmdBar.setActiveCommand(command);
 		}
 	}
 }

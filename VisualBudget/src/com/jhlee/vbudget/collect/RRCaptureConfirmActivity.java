@@ -1,4 +1,4 @@
-package com.jhlee.vbudget.camera;
+package com.jhlee.vbudget.collect;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,7 +55,7 @@ public class RRCaptureConfirmActivity extends Activity {
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-		this.setContentView(R.layout.rr_captured);
+		this.setContentView(R.layout.collect_captured);
 
 		/** Initialize db adapter */
 		mDbAdapter = new RRDbAdapter(this);

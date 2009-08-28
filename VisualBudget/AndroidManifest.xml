@@ -9,14 +9,14 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity android:name="com.jhlee.vbudget.camera.RRTakeReceiptActivity"
+		<activity android:name="com.jhlee.vbudget.collect.RRTakeReceiptActivity"
 			android:label="@string/app_name">
 			<intent-filter>
 				<action android:name="android.intent.action.RRTakeReceiptActivity" />
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity android:name="com.jhlee.vbudget.camera.RRCaptureConfirmActivity"
+		<activity android:name="com.jhlee.vbudget.collect.RRCaptureConfirmActivity"
 			android:label="@string/app_name">
 			<intent-filter>
 				<action android:name="android.intent.action.RRCaptureConfirmActivity" />

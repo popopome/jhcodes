@@ -1,4 +1,4 @@
-package com.jhlee.vbudget.camera;
+package com.jhlee.vbudget.collect;
 
 import java.io.IOException;
 
