@@ -136,7 +136,7 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 			budgetView = new RRBudgetMainView(this);
 			mContentViewPool.put(cmdId, budgetView);
 			RRDbBasedBudgetDataProvider dataProvider = new RRDbBasedBudgetDataProvider(
-					this, mDbAdapter);
+					mDbAdapter);
 			budgetView.setBudgetDataProvider(dataProvider);
 		} else {
 			budgetView.refreshData();

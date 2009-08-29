@@ -17,6 +17,7 @@ import com.jhlee.vbudget.util.RRUtil;
 
 public class RRDbAdapter {
 
+
 	private static final String LOG = "RRDbAdapter";
 
 	private static final int DB_VERSION = 16;
@@ -29,6 +30,7 @@ public class RRDbAdapter {
 	public static final String KEY_RECEIPT_TAKEN_DAY_OF_WEEK = "taken_day_of_week";
 	public static final String KEY_RECEIPT_TAKEN_DAY_OF_MONTH = "taken_day_of_month";
 	public static final String KEY_RECEIPT_TOTAL = "total";
+	public static final String KEY_RECEIPT_BUDGET_ID = "budget_id";
 
 	/* KEYS for TAG SOURCE TABLE */
 	public static final String KEY_TAG_SOURCE_ID = "_id";
@@ -117,6 +119,7 @@ public class RRDbAdapter {
 
 	private static final long TAG_STRING_FORMAT_MULTI_LINE = 1;
 	private static final long TAG_STRING_FORMAT_COMMA_SEP = 2;
+	private static final long NULL_BALANCE = 0x7FFFFFFF;
 
 	private DbHelper mDbHelper;
 	private SQLiteDatabase mDb;
@@ -526,7 +529,7 @@ public class RRDbAdapter {
 		vals.put("budget_balance", amount);
 
 		long rowid = mDb.insert(TABLE_BUDGET, null, vals);
-		if(-1 == rowid) {
+		if (-1 == rowid) {
 			Log.e(TAG, "Unable to insert budget");
 			return false;
 		}
@@ -543,17 +546,17 @@ public class RRDbAdapter {
 		return true;
 	}
 
-	
 	/*
 	 * Update budget item
 	 */
-	public boolean updateBudgetItem(int year, int month, String budgetName, long budgetAmount) {
+	public boolean updateBudgetItem(int year, int month, String budgetName,
+			long budgetAmount) {
 		ContentValues vals = new ContentValues();
 		vals.put("budget_name", budgetName);
 		vals.put("budget_amount", budgetAmount);
-		
+
 		String whereStr = makeWhereForBudgetFinding(year, month, budgetName);
-		
+
 		int rowCnt = mDb.update(TABLE_BUDGET, vals, whereStr, null);
 		if (1 != rowCnt) {
 			Log.e(TAG, "Unable to update budget:where=" + whereStr);
@@ -561,15 +564,17 @@ public class RRDbAdapter {
 		}
 		return true;
 	}
-	
+
 	/*
 	 * Find budget item
 	 */
 	public long findBudgetItem(int year, int month, String budgetName) {
-		Cursor c = mDb.query(TABLE_BUDGET, new String[]{"_id"}, makeWhereForBudgetFinding(year, month, budgetName), null, null, null, null);
-		if(c.getCount() == 0)
+		Cursor c = mDb.query(TABLE_BUDGET, new String[] { "_id" },
+				makeWhereForBudgetFinding(year, month, budgetName), null, null,
+				null, null);
+		if (c.getCount() == 0)
 			return -1;
-		
+
 		c.moveToFirst();
 		long id = c.getLong(0);
 		c.close();
@@ -597,13 +602,72 @@ public class RRDbAdapter {
 	 * Query all default budget names
 	 */
 	public Cursor queryAllDefaultBudgetNames() {
-		Cursor cursor = mDb.query(TABLE_DEFAULT_BUDGET_NAMES, 
-				new String[]{"budget_name"}, null, null, null, null, "budget_name");
+		Cursor cursor = mDb.query(TABLE_DEFAULT_BUDGET_NAMES,
+				new String[] { "budget_name" }, null, null, null, null,
+				"budget_name");
 		cursor.moveToFirst();
 		mOwnerActivity.startManagingCursor(cursor);
 		return cursor;
 	}
+
+	/*
+	 * Make transaction from budget
+	 */
+	public boolean makeTransactionFromBudget(long transId, long money,
+			long budgetId) {
+		long balance = queryBudgetBalance(budgetId);
+		if(NULL_BALANCE == balance)
+			return false;
+		
+		balance -= money;
+		if(false == updateBudgetBalance(budgetId, balance))
+			return false;
+		
+		return updateTransactionBudget(transId, budgetId);
+	}
 	
+	/*
+	 * Udpate transaction budget
+	 */
+	private boolean updateTransactionBudget(long transId, long budgetId) {
+		ContentValues val = new ContentValues();
+		val.put(KEY_RECEIPT_BUDGET_ID, budgetId);
+		int rowCnt = mDb.update(TABLE_RECEIPT, val, "_id="+transId, null);
+		if(rowCnt != -1){
+			Log.e(TAG, "Unable to update transaction budget:transId=" + transId);
+			return false;
+		}
+		return true;
+	}
+
+	/*
+	 * Update budget balance
+	 */
+	private boolean updateBudgetBalance(long budgetId, long balance) {
+		ContentValues val = new ContentValues();
+		val.put(KEY_BUDGET_BALANCE, balance);
+		int rowCnt = mDb.update(TABLE_BUDGET, val, "_id=" + budgetId, null);
+		if(rowCnt != -1) {
+			Log.e(TAG, "Unable to update budget blance:budgetId=" + budgetId + ", budgetBalance=" + balance);
+			return false;
+		}
+		return true;
+	}
+
+	/*
+	 * Get budget balance
+	 */
+	private long queryBudgetBalance(long budgetId) {
+		Cursor c = mDb.query(TABLE_BUDGET, new String[] { "budget_balance" },
+				"_id=" + budgetId, null, null, null, null);
+		if(c.getCount() == 0)
+			return NULL_BALANCE;
+		c.moveToFirst();
+		long balance = c.getLong(0);
+		c.close();
+		return balance;
+	}
+
 	/*
 	 * Check whether budget is used
 	 */
@@ -657,10 +721,9 @@ public class RRDbAdapter {
 			}
 
 			/*
-			 * Set up budget name.
-			 * We share tag name and budget
+			 * Set up budget name. We share tag name and budget
 			 */
-			
+
 			for (int i = defaultTags.length - 1; i >= 0; --i) {
 				val.put("budget_name", defaultTags[i]);
 				db.insert(TABLE_DEFAULT_BUDGET_NAMES, null, val);

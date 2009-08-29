@@ -13,7 +13,7 @@ public class RRDbBasedBudgetDataProvider implements RRBudgetDataProvider{
 	
 	private static final String TAG = "RRDbBasedBudgetDataProvider";
 
-	private Activity mOwnerActivity;
+	
 	private RRDbAdapter	mDbAdapter;
 	private Cursor	mItemCursor;
 	private Cursor	mMonthCursor;
@@ -21,8 +21,7 @@ public class RRDbBasedBudgetDataProvider implements RRBudgetDataProvider{
 	/*
 	 * CTOR
 	 */
-	public RRDbBasedBudgetDataProvider(Activity activity, RRDbAdapter dbAdapter) {
-		mOwnerActivity = activity;
+	public RRDbBasedBudgetDataProvider(RRDbAdapter dbAdapter) {
 		mDbAdapter = dbAdapter;
 		
 		refreshData();
@@ -36,8 +35,6 @@ public class RRDbBasedBudgetDataProvider implements RRBudgetDataProvider{
 		
 		mItemCursor = mDbAdapter.queryAllBudgetItems();
 		mMonthCursor = mDbAdapter.queryMonthBudgets();
-		mOwnerActivity.startManagingCursor(mItemCursor);
-		mOwnerActivity.startManagingCursor(mMonthCursor);
 	}
 	
 	private void requery() {

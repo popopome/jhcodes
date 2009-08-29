@@ -70,6 +70,42 @@ public class RRCollectView extends ScrollView {
 			public void onClick(View v) {
 				final RRTransactionEditDialog dlg = new RRTransactionEditDialog(RRCollectView.this.getContext());
 				dlg.initialize(mDbAdapter);
+				
+				dlg
+				.setOnDismissListener(new DialogInterface.OnDismissListener() {
+					@Override
+					public void onDismiss(DialogInterface dialog) {
+						/* Dialog is closed */
+						if (dlg.isCanceled())
+							return;
+
+						long transId = mDbAdapter.newTransaction();
+						if (-1 == transId) {
+							Log.e(TAG, "Unable to create new transaction");
+							return;
+						}
+						
+						/* Read-only tag list */
+						Iterator<String> it = dlg.getTaglistIterator();
+						while(it.hasNext()) {
+							mDbAdapter.addTagToReceipt(transId, it.next());
+						}
+						long money = dlg.getExpenseAmount();
+						mDbAdapter.updateTotalMoney(transId, (int)money/100, (int)money%100);
+						
+						/* Apply budget field */
+						long budgetId = dlg.getSelectedBudgetId();
+						if(-1 == budgetId)
+							return;
+						
+						mDbAdapter.makeTransactionFromBudget(
+								transId,
+								money,
+								budgetId);
+					}
+				});
+				
+				
 				dlg.show();
 //				final RRTagSelectDialog dlg = new RRTagSelectDialog(
 //						RRCollectView.this.getContext());

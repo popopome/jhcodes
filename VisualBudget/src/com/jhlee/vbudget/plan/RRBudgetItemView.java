@@ -64,7 +64,7 @@ public class RRBudgetItemView extends FrameLayout {
 		requestLayout();
 	}
 
-	public void disableDeleteButton() {
+	public void hideDeleteButton() {
 		mDeleteButton.setVisibility(View.GONE);
 		requestLayout();
 	}

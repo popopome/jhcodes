@@ -29,8 +29,10 @@ public class RRMonthBudgetView extends LinearLayout {
 	private int mYear;
 	private int mMonth;
 	private int mDesiredWidth;
+	private boolean mUseDeleteButton;
 
 	private RRBudgetItemData mTmpBudgetItemData = new RRBudgetItemData();
+	private OnBudgetItemClickListener mBudgetItemClickListener;
 
 	public RRMonthBudgetView(Context context) {
 		this(context, null);
@@ -38,7 +40,8 @@ public class RRMonthBudgetView extends LinearLayout {
 
 	public RRMonthBudgetView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		
+
+		mUseDeleteButton = true;
 		buildLayout();
 	}
 
@@ -84,6 +87,18 @@ public class RRMonthBudgetView extends LinearLayout {
 						final int dataPosition = (position - 3);
 						mProvider.getBudgetItem(mYear, mMonth, dataPosition,
 								mTmpBudgetItemData);
+
+						/* If budget item listener is clicked,
+						 * then use it.
+						 * 
+						 */
+						if (mBudgetItemClickListener != null) {
+							mBudgetItemClickListener.onBudgetItemClicked(mYear,
+									mMonth, mTmpBudgetItemData.mBudgetName,
+									mTmpBudgetItemData.mBudgetAmount,
+									mTmpBudgetItemData.mBudgetBalance);
+							return;
+						}
 						dlg.editBudget(mTmpBudgetItemData.mBudgetName,
 								mTmpBudgetItemData.mBudgetAmount);
 						dlg
@@ -97,8 +112,7 @@ public class RRMonthBudgetView extends LinearLayout {
 												.getBudgetAmount();
 										String budgetName = dlg.getBudgetName();
 										RRMonthBudgetView.this.updateBudget(
-												budgetName,
-												budgetAmount);
+												budgetName, budgetAmount);
 									}
 								});
 						dlg.show();
@@ -137,25 +151,28 @@ public class RRMonthBudgetView extends LinearLayout {
 	private void addNewBudget(final String budgetName, final long budgetAmount) {
 		/* Let's find whether the data is already in there */
 		boolean found = mProvider.findBudgetItem(mYear, mMonth, budgetName);
-		if(found == true) {
-			/* Dup is found.
-			 * Ask to user whether overwrite previous data or not.
+		if (found == true) {
+			/*
+			 * Dup is found. Ask to user whether overwrite previous data or not.
 			 */
 			new AlertDialog.Builder(RRMonthBudgetView.this.getContext())
-            .setTitle("The budget item is already in program. Are you sure to overwrite previous budget data?")
-            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                	updateBudget(budgetName, budgetAmount);
-                }
-            })
-            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                }
-            })
-            .create().show();
+					.setTitle(
+							"The budget item is already in program. Are you sure to overwrite previous budget data?")
+					.setPositiveButton("Yes",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int whichButton) {
+									updateBudget(budgetName, budgetAmount);
+								}
+							}).setNegativeButton("No",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int whichButton) {
+								}
+							}).create().show();
 			return;
 		}
-		
+
 		/*
 		 * Add budget to db
 		 */
@@ -176,11 +193,10 @@ public class RRMonthBudgetView extends LinearLayout {
 	/*
 	 * Update old budget
 	 */
-	private void updateBudget(String budgetName,
-			long budgetAmount) {
+	private void updateBudget(String budgetName, long budgetAmount) {
 		mTmpBudgetItemData.mBudgetName = budgetName;
 		mTmpBudgetItemData.mBudgetAmount = budgetAmount;
-		if (false == mProvider.updateBudgetItem(mYear, mMonth, 
+		if (false == mProvider.updateBudgetItem(mYear, mMonth,
 				mTmpBudgetItemData))
 			return;
 
@@ -189,15 +205,26 @@ public class RRMonthBudgetView extends LinearLayout {
 		/* Add budget item to list */
 		mAdapter.notifyDataSetChanged();
 	}
-	
+
 	/*
 	 * Delete budget item
 	 */
 	private void deleteBudgetItem(String budgetName) {
 		mProvider.deleteBudgetItem(mYear, mMonth, budgetName);
-		
+
 		mProvider.refreshData();
 		mAdapter.notifyDataSetChanged();
+	}
+
+	/*
+	 * Hide delete button
+	 */
+	public void hideDeleteButton() {
+		mUseDeleteButton = false;
+	}
+
+	public void setOnBudgetItemClickListener(OnBudgetItemClickListener listener) {
+		mBudgetItemClickListener = listener;
 	}
 
 	/*
@@ -237,7 +264,8 @@ public class RRMonthBudgetView extends LinearLayout {
 				}
 				if (1 == position) {
 					long totalMoney = mProvider.getBudgetAmount(mYear, mMonth);
-					String moneyStr = RRUtil.formatMoney(totalMoney/100, totalMoney%100, true);
+					String moneyStr = RRUtil.formatMoney(totalMoney / 100,
+							totalMoney % 100, true);
 					textView.setText(moneyStr);
 					return textView;
 				}
@@ -256,61 +284,40 @@ public class RRMonthBudgetView extends LinearLayout {
 
 			mProvider.getBudgetItem(mYear, mMonth, dataPosition,
 					mTmpBudgetItemData);
-			
-			final String budgetName = new String(mTmpBudgetItemData.mBudgetName);
-			
-			RRBudgetItemView itemView = new RRBudgetItemView(RRMonthBudgetView.this.getContext());
-			itemView.setBudgetItemData(mTmpBudgetItemData.mBudgetName, mTmpBudgetItemData.mBudgetAmount, mTmpBudgetItemData.mBudgetBalance);
-			itemView.setOnDeleteButtonClickListener(new OnDeleteButtonClickListener() {
 
-				@Override
-				public void onDeleteButtonClicked(View view) {
-					RRMonthBudgetView.this.deleteBudgetItem(budgetName);
-				}
-				
-			});
-			
-			
-			/* Generate view for budget */
-//			View itemView = createViewsFromLayout(
-//					R.layout.rr_month_budget_list_item, null);
-//			TextView textView = (TextView) itemView
-//					.findViewById(R.id.budget_item_name);
-//			TextView budgetAmountView = (TextView) itemView
-//					.findViewById(R.id.budget_item_amount);
-//
-//			
-//			
-//			final String budgetName = new String(mTmpBudgetItemData.mBudgetName);
-//			
-//			textView.setText(mTmpBudgetItemData.mBudgetName);
-//			textView.setFocusable(false);
-//			textView.setClickable(false);
-//			textView.setLongClickable(false);
-//
-//			/* Set budget amount */
-//			final long total = mTmpBudgetItemData.mBudgetAmount;
-//			String budgetAmountString = RRUtil.formatMoney(total / 100,
-//					total % 100, true);
-//			budgetAmountView.setText(budgetAmountString);
-//			
-//			/* 
-//			 * Delete button
-//			 * Register delete button click action 
-//			 */
-//			Button deleteBtn = (Button)itemView.findViewById(R.id.budget_item_delete_button);
-//			deleteBtn.setOnClickListener(new View.OnClickListener() {
-//
-//				/* Budget delete button is clicked */
-//				@Override
-//				public void onClick(View v) {
-//					RRMonthBudgetView.this.deleteBudgetItem(budgetName);
-//				}
-//				
-//			});
+			final String budgetName = new String(mTmpBudgetItemData.mBudgetName);
+
+			RRBudgetItemView itemView = new RRBudgetItemView(
+					RRMonthBudgetView.this.getContext());
+			itemView.setBudgetItemData(mTmpBudgetItemData.mBudgetName,
+					mTmpBudgetItemData.mBudgetAmount,
+					mTmpBudgetItemData.mBudgetBalance);
+			if (mUseDeleteButton) {
+				itemView
+						.setOnDeleteButtonClickListener(new OnDeleteButtonClickListener() {
+
+							@Override
+							public void onDeleteButtonClicked(View view) {
+								RRMonthBudgetView.this
+										.deleteBudgetItem(budgetName);
+							}
+
+						});
+			} else {
+				itemView.hideDeleteButton();
+			}
 
 			return itemView;
 		}
+
+	}
+
+	/*
+	 * Budget item click listener
+	 */
+	public interface OnBudgetItemClickListener {
+		public void onBudgetItemClicked(int year, int month, String budgetName,
+				long budgetAmount, long budgetBalance);
 
 	}
 

@@ -4,39 +4,64 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical">
 	<TextView android:id="@+id/TextView01" android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:text="1. Select Budget" android:shadowColor="#88333333" android:shadowRadius="2.0" android:textSize="20.0sp"></TextView>
+		android:layout_height="wrap_content" android:text="1. Select Budget"
+		android:shadowColor="#88333333" android:shadowRadius="2.0"
+		android:textSize="20.0sp"></TextView>
 	<LinearLayout android:id="@+id/LinearLayout04"
 
 		android:layout_height="wrap_content" android:layout_width="fill_parent">
-		<TextView android:id="@+id/TextView06" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1.0" android:hint="Select budget"></TextView><Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="BudgetBrowser" android:id="@+id/button_budget_browser"></Button>
-	
-</LinearLayout>
+		<TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:layout_weight="1.0"
+			android:hint="Select budget" android:id="@+id/budget_name"></TextView>
+		<Button android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="BudgetBrowser"
+			android:id="@+id/button_budget_browse"></Button>
+
+	</LinearLayout>
 
 	<TextView android:id="@+id/TextView02" android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:text="2. Enter amount" android:textSize="20.0sp"></TextView>
+		android:layout_height="wrap_content" android:text="2. Enter amount"
+		android:textSize="20.0sp"></TextView>
 
 	<LinearLayout android:id="@+id/LinearLayout02"
-		android:layout_height="wrap_content"
-		android:orientation="horizontal" android:layout_width="fill_parent">
-		<TextView android:id="@+id/TextView04" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:orientation="horizontal"
+		android:layout_width="fill_parent">
+		<TextView android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:text="$0.0"
-			android:layout_weight="1.0" android:hint="$0.0"></TextView>
+			android:layout_weight="1.0" android:hint="$0.0" android:id="@+id/trans_amount"></TextView>
 		<Button android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:text="Numpad" android:id="@+id/button_numpad"></Button>
+			android:layout_height="wrap_content" android:text="Numpad"
+			android:id="@+id/button_numpad"></Button>
 	</LinearLayout>
 	<TextView android:id="@+id/TextView03" android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:text="3. Tag your expense" android:textSize="20.0sp"></TextView>
+		android:layout_height="wrap_content" android:text="3. Tag your expense"
+		android:textSize="20.0sp"></TextView>
 
 
 	<LinearLayout android:id="@+id/LinearLayout03"
-		android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1.0">
-		<TextView android:id="@+id/TextView05"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:layout_weight="1.0" android:inputType="textMultiLine" android:text="Description about expense. Tag it!" android:textSize="20.0sp"></TextView>
+		android:layout_height="wrap_content" android:layout_width="fill_parent"
+		android:layout_weight="1.0">
+
+
+		<TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:layout_weight="1.0"
+			android:inputType="textMultiLine" android:text="Description about expense. Tag it!"
+			android:textSize="20.0sp" android:id="@+id/tag_list"></TextView>
 		<Button android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:text="TagBrowser" android:id="@+id/button_tag_browser"></Button>
-	
-</LinearLayout>
+			android:layout_height="wrap_content" android:text="TagBrowser"
+			android:id="@+id/button_tag_browser"></Button>
+
+	</LinearLayout>
+	<LinearLayout android:id="@+id/LinearLayout05"
+		
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:gravity="center_horizontal"
+		>
+		<Button android:text="OK" android:id="@+id/button_ok"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+		<Button android:text="Cancel" android:id="@+id/button_cancel"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+	</LinearLayout>
 
 
 </LinearLayout>
