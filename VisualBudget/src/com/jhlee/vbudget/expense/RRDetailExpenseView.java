@@ -10,12 +10,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jhlee.vbudget.R;
 import com.jhlee.vbudget.db.RRDbAdapter;
+import com.jhlee.vbudget.tags.RRTagDataProviderFromDb;
+import com.jhlee.vbudget.tags.RRTagSelectDialog;
 import com.jhlee.vbudget.util.RRUtil;
 
 /**
@@ -48,7 +49,7 @@ public class RRDetailExpenseView extends FrameLayout {
 	public RRDetailExpenseView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
-		mFrame = (View)RRUtil.createViewsFromLayout(context, R.layout.rr_receipt_detail, this);
+		mFrame = (View)RRUtil.createViewsFromLayout(context, R.layout.expense_detail, this);
 	}
 	
 	public void setExpense(RRDbAdapter dbAdapter, int expenseId) {
@@ -67,7 +68,14 @@ public class RRDetailExpenseView extends FrameLayout {
 				.getColumnIndex(RRDbAdapter.KEY_RECEIPT_IMG_FILE);
 		int colCount = mCursor.getColumnCount();
 		String imgFilePath = mCursor.getString(colIndexImgFile);
-		Bitmap bmp = BitmapFactory.decodeFile(imgFilePath);
+		
+		Bitmap bmp = null;
+		if( 0 == imgFilePath.compareTo("NT")) {
+			bmp = BitmapFactory.decodeResource(this.getResources(), R.drawable.new_trans);
+		} else {
+			bmp = BitmapFactory.decodeFile(imgFilePath);	
+		}
+		
 		if (null == bmp) {
 			this.showErrorMessage("Unable to load file:" + imgFilePath);
 			return;
@@ -241,32 +249,34 @@ public class RRDetailExpenseView extends FrameLayout {
 	 */
 	private void initializeTagBoxAndTagButton(final RRDetailExpenseView self) {
 		/* Set tag data provider */
-		final RRTagBox tagBox = (RRTagBox) self.findViewById(R.id.tag_box);
+//		final RRTagBox tagBox = (RRTagBox) self.findViewById(R.id.tag_box);
 		mTagDataProvider = new RRTagDataProviderFromDb(mDbAdapter);
-		tagBox.setTagProvider(mTagDataProvider);
-		tagBox.setOnTagItemStateChangeListener(new RRTagStreamView.OnTagItemStateChangeListener() {
-			/*
-			 * Let's update tag item status
-			 */
-			public void onTagItemStateChanged(String tag, boolean checked) {
-				RRDetailExpenseView.this.refreshTagInfoView();
-				
-			}
-		});
+//		tagBox.setTagProvider(mTagDataProvider);
+//		tagBox.setOnTagItemStateChangeListener(new RRTagStreamView.OnTagItemStateChangeListener() {
+//			/*
+//			 * Let's update tag item status
+//			 */
+//			public void onTagItemStateChanged(String tag, boolean checked) {
+//				RRDetailExpenseView.this.refreshTagInfoView();
+//				
+//			}
+//		});
 		
 		
 		/* Initialize tag button */
 		Button tagButton = (Button)findViewById(R.id.button_tag);
 		tagButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				/* Show tag box */
-				RRTagBox tagBox = (RRTagBox) self.findViewById(R.id.tag_box);
-				tagBox.setVisibility(View.VISIBLE);
+//				/* Show tag box */
+//				RRTagBox tagBox = (RRTagBox) self.findViewById(R.id.tag_box);
+//				tagBox.setVisibility(View.VISIBLE);
 				
 				mTagDataProvider.setActiveReceiptId(mRID);
 				
-				/* Refresh tag data */
-				tagBox.refreshTags();
+				/* Show tag selection dialog */
+				final RRTagSelectDialog dlg = new RRTagSelectDialog(RRDetailExpenseView.this.getContext());
+				dlg.initialize(mTagDataProvider);
+				dlg.show();
 			}
 		});
 	}

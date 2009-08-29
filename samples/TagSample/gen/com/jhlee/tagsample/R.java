@@ -19,21 +19,31 @@ public final class R {
         public static final int solid_white=0x7f020002;
     }
     public static final class id {
-        public static final int Button01=0x7f050009;
-        public static final int TableLayout01=0x7f050007;
-        public static final int TableRow01=0x7f050008;
+        public static final int Button01=0x7f050011;
+        public static final int TableLayout01=0x7f05000f;
+        public static final int TableRow01=0x7f050010;
+        public static final int button_cancel=0x7f05000d;
+        public static final int button_done=0x7f05000e;
+        public static final int button_new_tag=0x7f05000c;
+        public static final int button_wrapper=0x7f05000b;
         public static final int tag_add=0x7f050004;
         public static final int tag_box_close=0x7f050005;
         public static final int tag_box_title=0x7f050001;
         public static final int tag_commands=0x7f050002;
         public static final int tag_edit=0x7f050003;
+        public static final int tag_name_edit=0x7f050008;
+        public static final int tag_name_view=0x7f050007;
         public static final int tag_stream_view=0x7f050006;
         public static final int tags_grid_view=0x7f050000;
+        public static final int tags_list_view=0x7f05000a;
+        public static final int title_bar=0x7f050009;
     }
     public static final class layout {
         public static final int main=0x7f030000;
         public static final int rr_tagbox=0x7f030001;
-        public static final int test_relative_layout=0x7f030002;
+        public static final int tag_new_entry=0x7f030002;
+        public static final int tag_select_dialog=0x7f030003;
+        public static final int test_relative_layout=0x7f030004;
     }
     public static final class string {
         public static final int app_name=0x7f040001;

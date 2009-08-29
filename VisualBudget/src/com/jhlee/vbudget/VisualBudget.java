@@ -16,7 +16,7 @@ import com.jhlee.vbudget.collect.RRCollectView;
 import com.jhlee.vbudget.db.RRDbAdapter;
 import com.jhlee.vbudget.expense.RRDailyExpenseCarouselView;
 import com.jhlee.vbudget.expense.RRDetailExpenseView;
-import com.jhlee.vbudget.plan.RRBudgetView;
+import com.jhlee.vbudget.plan.RRBudgetMainView;
 import com.jhlee.vbudget.plan.RRDbBasedBudgetDataProvider;
 import com.jhlee.vbudget.statistics.RRStatisticsView;
 
@@ -120,6 +120,7 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 		RRCollectView collectView = (RRCollectView) mContentViewPool.get(cmdId);
 		if (null == collectView) {
 			collectView = new RRCollectView(this);
+			collectView.initialize(mDbAdapter);
 			mContentViewPool.put(cmdId, collectView);
 		}
 		return collectView;
@@ -130,9 +131,9 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 	 */
 	private View getPlanView(int cmdId, String cmdLabel) {
 		/* Find plan content view */
-		RRBudgetView budgetView = (RRBudgetView) mContentViewPool.get(cmdId);
+		RRBudgetMainView budgetView = (RRBudgetMainView) mContentViewPool.get(cmdId);
 		if (null == budgetView) {
-			budgetView = new RRBudgetView(this);
+			budgetView = new RRBudgetMainView(this);
 			mContentViewPool.put(cmdId, budgetView);
 			RRDbBasedBudgetDataProvider dataProvider = new RRDbBasedBudgetDataProvider(
 					this, mDbAdapter);

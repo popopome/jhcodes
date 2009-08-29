@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.jhlee.tagsample.R;
+import com.jhlee.tagsample.RRTagsListView;
 import com.jhlee.tagsample.RRTagStreamView.RRTagDataProvider;
 
 public class TagSample extends Activity {
@@ -100,5 +102,9 @@ public class TagSample extends Activity {
         tagBox.setTagProvider(mTagProvider);*/
         RRTagsListView gridView = (RRTagsListView)findViewById(R.id.tags_grid_view);
         gridView.initialize(mTagProvider);
+        
+        RRTagSelectDialog dlg = new RRTagSelectDialog(this);
+        dlg.initialize(mTagProvider);
+        dlg.show();
     }
 }

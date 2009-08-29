@@ -17,6 +17,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -30,10 +31,13 @@ import com.jhlee.vbudget.expense.RRCarouselFlowView.OnCarouselActiveItemChanged;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.OnCarouselActiveItemClickListener;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.OnCarouselItemCustomDrawListener;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.RRCarouselItem;
+import com.jhlee.vbudget.tags.RRTagDataProviderFromDb;
+import com.jhlee.vbudget.tags.RRTagSelectDialog;
 import com.jhlee.vbudget.util.RRUtil;
 
 public class RRDailyExpenseCarouselView extends FrameLayout implements
 		OnCarouselActiveItemClickListener, OnCarouselActiveItemChanged {
+	private static final String TAG = "rrdailyExpenseCarouselView";	
 	private static final String POSTFIX_REFLECTION_BMP = "@#$";
 
 	private FrameLayout	mFrameView;
@@ -68,17 +72,17 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	 */
 	public boolean initializeViews(RRDbAdapter dbAdapter) {
 		mFrameView = (FrameLayout) RRUtil.createViewsFromLayout(getContext(),
-				R.layout.rr_carousel_receipt_list, this);
+				R.layout.expense_carousel, this);
 		mCarouselView = (RRCarouselFlowView) mFrameView.findViewById(R.id.carouselView);
 
-		/* Install back button listener */
-		Button backButton = (Button) mFrameView.findViewById(R.id.back_button);
-		backButton.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				/* Finish activity */
-				/* TODO: Remove this button */
-			}
-		});
+//		/* Install back button listener */
+//		Button backButton = (Button) mFrameView.findViewById(R.id.back_button);
+//		backButton.setOnClickListener(new Button.OnClickListener() {
+//			public void onClick(View v) {
+//				/* Finish activity */
+//				/* TODO: Remove this button */
+//			}
+//		});
 
 		/* Collect receipt data from database */
 		mAdapter = dbAdapter;
@@ -86,6 +90,8 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		int numOfReceipts = mCursor.getCount();
 		if (numOfReceipts < 1) {
 			/* TODO: Show receipt data first */
+			Log.e(TAG, "NO RECEIPT DATA-----------------!");
+			
 			/*
 			 * No data is in there. Just finisth the activity.
 			 */
@@ -126,26 +132,31 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	 */
 	private void initializeTagBoxAndTagButton() {
 		/* Set tag data provider */
-		final RRTagBox tagBox = (RRTagBox) mFrameView.findViewById(R.id.tag_box);
+		/*final RRTagBox tagBox = (RRTagBox) mFrameView.findViewById(R.id.tag_box);
 		mTagDataProvider = new RRTagDataProviderFromDb(mAdapter);
-		tagBox.setTagProvider(mTagDataProvider);
+		tagBox.setTagProvider(mTagDataProvider);*/
+		mTagDataProvider = new RRTagDataProviderFromDb(mAdapter);
 
 		/* Initialize tag button */
 		Button tagButton = (Button) findViewById(R.id.button_tag);
 		tagButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				/* Show tag box */
-				RRTagBox tagBox = (RRTagBox) RRDailyExpenseCarouselView.this.findViewById(R.id.tag_box);
-				tagBox.setVisibility(View.VISIBLE);
-
-				/* Request layout */
-				RRDailyExpenseCarouselView.this.findViewById(R.id.rr_receipt_carousel_list)
-						.requestLayout();
-
+				/* Set active receipt id */
 				mTagDataProvider.setActiveReceiptId(getActiveReceiptId());
-
-				/* Refresh tag data */
-				tagBox.refreshTags();
+				
+				/* Show tag selection dialog */
+				final RRTagSelectDialog dlg = new RRTagSelectDialog(RRDailyExpenseCarouselView.this.getContext());
+				dlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
+					/* Dialog dismissed */
+					@Override
+					public void onDismiss(DialogInterface dialog) {
+						if(dlg.isCanceled())
+							return;
+					}
+					
+				});
+				dlg.initialize(mTagDataProvider);
+				dlg.show();
 			}
 		});
 	}
@@ -319,19 +330,19 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	 * Active item is changed
 	 */
 	public void onActiveItemChanged(RRCarouselFlowView view, RRCarouselItem item) {
-		/*
-		 * If tag view is opened, let's refresh tag view
-		 */
-		RRTagBox tagBox = (RRTagBox) findViewById(R.id.tag_box);
-		if (tagBox.getVisibility() == View.VISIBLE) {
-			String activeTag = tagBox.getActiveTag();
-
-			/* Set active tag */
-			mTagDataProvider.setActiveReceiptId(getActiveReceiptId());
-			tagBox.refreshTags();
-
-			tagBox.scrollToTag(activeTag);
-		}
+//		/*
+//		 * If tag view is opened, let's refresh tag view
+//		 */
+//		RRTagBox tagBox = (RRTagBox) findViewById(R.id.tag_box);
+//		if (tagBox.getVisibility() == View.VISIBLE) {
+//			String activeTag = tagBox.getActiveTag();
+//
+//			/* Set active tag */
+//			mTagDataProvider.setActiveReceiptId(getActiveReceiptId());
+//			tagBox.refreshTags();
+//
+//			tagBox.scrollToTag(activeTag);
+//		}
 	}
 
 	private class ReceiptItemCustomDrawer implements
@@ -377,7 +388,14 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 						+ POSTFIX_REFLECTION_BMP);
 			} else {
 				/* Load bitmap from file */
-				bmp = BitmapFactory.decodeFile(imgFileName);
+				if(0 == imgFileName.compareTo("NTS")) {
+					/* Use default small image */
+					bmp = BitmapFactory.decodeResource(RRDailyExpenseCarouselView.this.getResources(), 
+							R.drawable.new_trans_small);
+				} else {
+					bmp = BitmapFactory.decodeFile(imgFileName);
+				}
+				
 				mBmpPool.put(imgFileName, bmp);
 				/* Generate reflected bitmap */
 				reflectedBmp = this.createReflectedBitmap(bmp);

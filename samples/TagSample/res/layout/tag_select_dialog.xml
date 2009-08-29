@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:orientation="vertical">
+
+
+	<TextView android:id="@+id/title_bar" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text="Select tag"
+		android:textSize="18.3sp" android:background="#44ffffff" />
+	<com.jhlee.tagsample.RRTagsListView
+		android:id="@+id/tags_list_view" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="1"
+		android:gravity="fill_horizontal" android:layout_below="@id/title_bar" />
+	<LinearLayout android:id="@+id/button_wrapper"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:layout_alignParentRight="true" android:background="#77333333">
+		<Button android:text="New" android:id="@+id/button_new_tag"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:gravity="fill_horizontal" />
+		<Button android:text="Cancel" android:id="@+id/button_cancel"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:gravity="fill_horizontal" />
+		<Button android:text="Done" android:id="@+id/button_done"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:gravity="fill_horizontal" />
+	</LinearLayout>
+</RelativeLayout>

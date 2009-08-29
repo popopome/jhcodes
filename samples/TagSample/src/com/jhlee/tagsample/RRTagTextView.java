@@ -36,6 +36,9 @@ public class RRTagTextView extends View {
 	private int mMinY;
 	private int mMaxX;
 	private int mMaxY;
+	
+	private OnTagClickListener	mTagClickListener;
+	
 
 	public RRTagTextView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -63,6 +66,9 @@ public class RRTagTextView extends View {
 		}
 	}
 
+	public void setOnTagClickListener(OnTagClickListener tagClickListener) {
+		mTagClickListener = tagClickListener;
+	}
 	public void setTagText(String text) {
 		mText = text;
 		this.requestLayout();
@@ -182,6 +188,8 @@ public class RRTagTextView extends View {
 				int movementY = mMaxY - mMinY;
 				if (movementX < 30 && movementY < 30) {
 					toggleCheck();
+					if(mTagClickListener != null)
+						mTagClickListener.onTagClicked(this, mText, isChecked());
 				}
 				invalidate();
 			}
@@ -193,6 +201,11 @@ public class RRTagTextView extends View {
 		}
 		/* Consumed */
 		return true;
+	}
+	
+	
+	public interface OnTagClickListener {
+		public void onTagClicked(View view, String tagName, boolean checked);
 	}
 
 }
