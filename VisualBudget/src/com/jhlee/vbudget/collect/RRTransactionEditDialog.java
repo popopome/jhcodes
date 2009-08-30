@@ -45,6 +45,7 @@ public class RRTransactionEditDialog extends Dialog {
 	public void initialize(RRDbAdapter dbAdapter) {
 		mDbAdapter = dbAdapter;
 		this.setContentView(R.layout.collect_transaction_edit_dialog);
+		this.setTitle("Enter expense");
 
 		mBudgetBrowseButton = (Button) findViewById(R.id.button_budget_browse);
 		mMoneyPadButton = (Button) findViewById(R.id.button_numpad);
@@ -132,13 +133,16 @@ public class RRTransactionEditDialog extends Dialog {
 				final RRMoneyInputDialog dlg = new RRMoneyInputDialog(
 						RRTransactionEditDialog.this.getContext());
 				String moneyStr = mTransAmountView.getText().toString();
-				moneyStr = moneyStr.substring(1);
 				long totalMoney = 0;
-				try {
-					totalMoney = (long) (100 * new Double(moneyStr));
-				} catch (Exception e) {
-					totalMoney = 0;
+				if(moneyStr.length() > 0) {
+					moneyStr = moneyStr.substring(1);
+					try {
+						totalMoney = (long) (100 * new Double(moneyStr));
+					} catch (Exception e) {
+						totalMoney = 0;
+					}
 				}
+				
 				dlg.setMoney((int) totalMoney / 100, (int) totalMoney % 100);
 				dlg
 						.setOnDismissListener(new DialogInterface.OnDismissListener() {

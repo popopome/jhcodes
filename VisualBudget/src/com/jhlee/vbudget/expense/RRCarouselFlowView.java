@@ -333,7 +333,7 @@ public class RRCarouselFlowView extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 
-		canvas.drawColor(Color.LTGRAY);
+//		canvas.drawColor(Color.LTGRAY);
 
 		/**
 		 * If there is custom drawer, then use it.

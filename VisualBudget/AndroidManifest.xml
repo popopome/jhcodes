@@ -3,12 +3,19 @@
 	package="com.jhlee.vbudget" android:versionCode="1"
 	android:versionName="1.0">
 	<application android:icon="@drawable/icon" android:label="@string/app_name">
-		<activity android:name=".VisualBudget" android:label="@string/app_name">
+		<!--<activity android:name=".VisualBudget" android:label="@string/app_name">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
+		--><activity android:name=".Budgeting" android:label="@string/app_name">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		
 		<activity android:name="com.jhlee.vbudget.collect.RRTakeReceiptActivity"
 			android:label="@string/app_name">
 			<intent-filter>

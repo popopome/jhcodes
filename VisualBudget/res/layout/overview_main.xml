@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView android:layout_width="fill_parent"
+	android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
+	android:fillViewport="true">
+	<LinearLayout android:id="@+id/LinearLayout01"
+		android:layout_width="fill_parent" android:layout_height="fill_parent"
+		android:orientation="vertical" android:padding="5px">
+
+		<LinearLayout android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:orientation="horizontal"
+			android:gravity="center_vertical|center_horizontal">
+			<LinearLayout android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:orientation="vertical"
+				android:gravity="center_vertical|center_horizontal">
+				<ImageButton android:text="Button02" android:id="@+id/camera_button"
+					android:layout_width="wrap_content" android:layout_height="wrap_content"
+					style="@style/Widget.Button.BigButton" android:src="@drawable/camera_big_icon" />
+				<TextView
+					android:text="Capture your expense.\nReceipt, stocks and friends,\nwhatever"
+					android:layout_width="wrap_content" android:layout_height="wrap_content"
+					android:inputType="textMultiLine" />
+			</LinearLayout>
+			<LinearLayout android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:orientation="vertical">
+
+				<ImageButton android:text="Button01" android:id="@+id/add_expense_button"
+					android:layout_width="wrap_content" android:layout_height="wrap_content"
+					style="@style/Widget.Button.BigButton"
+					android:src="@drawable/enter_transaction"
+					></ImageButton>
+				<TextView
+					android:text="Enter your expense.\nTagging it and\nleave total amount."
+					android:layout_width="wrap_content" android:layout_height="wrap_content"
+					android:inputType="textMultiLine" />
+			</LinearLayout>
+		</LinearLayout>
+		<LinearLayout android:id="@+id/LinearLayout02"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
+			android:orientation="horizontal">
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:text="BUDGET"
+				android:textColor="#ffffffff" android:shadowColor="#ff333333"
+				android:shadowRadius="2.0" android:textStyle="bold" />
+			<TextView android:id="@+id/budget_year_month"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:text="  AUGUST 2009  " android:textColor="#ffffffff"
+				android:shadowColor="#ff333333" android:paddingLeft="10px"
+				android:paddingRight="10px" android:shadowRadius="2.0"
+				android:textStyle="italic" />
+		</LinearLayout>
+		<LinearLayout android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:orientation="horizontal">
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:layout_weight="1"
+				android:textColor="#ff777777" android:text="Total"
+				android:textStyle="bold" />
+			<TextView android:id="@+id/budget_balance"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:textColor="#ff999999" android:textColorHint="#ff999999"
+				android:textStyle="bold" />
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:textColor="#ff999999"
+				android:text=" of " android:textStyle="bold" />
+			<TextView android:id="@+id/budget_total"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:textColor="#ff685c76" android:textColorHint="#ff685c76"
+				android:textStyle="bold" />
+		</LinearLayout>
+		<ProgressBar android:id="@+id/budget_progress_bar"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
+			style="@style/progressbar.horizontal" android:max="100"
+			android:progress="50" android:layout_marginBottom="5px" />
+		<LinearLayout android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:orientation="horizontal">
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:layout_weight="1"
+				android:textColor="#ff777777" android:text="BUDGET NAME"
+				android:textStyle="bold" />
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:textColor="#ff999999"
+				android:text="LEFT" android:textStyle="bold" />
+		</LinearLayout>
+		<ListView android:id="@+id/budget_list" android:layout_width="fill_parent"
+			android:layout_height="fill_parent" android:cacheColorHint="#00000000"
+			android:divider="@drawable/overview_divider" android:dividerHeight="1dip"
+			android:footerDividersEnabled="true" android:padding="5px"
+			android:headerDividersEnabled="true"></ListView>
+	
+
+</LinearLayout>
+
+</ScrollView>

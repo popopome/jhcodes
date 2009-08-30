@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 public class RRUtil {
+	public static String[] mMonthStr;
 	public static SimpleDateFormat mDataFormatter = new SimpleDateFormat("MM-dd-yyyy");
 	public static SimpleDateFormat mGMTDataFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	static {
@@ -20,6 +21,11 @@ public class RRUtil {
 		SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
 		String dateString = formatter.format(new Date());
 		return dateString;
+	}
+	
+	public static String getCurrentYearMonthString() {
+		SimpleDateFormat formatter = new SimpleDateFormat("MMM yyyy");
+		return formatter.format(new Date());
 	}
 	
 	public static String getCurrentTimeString() {

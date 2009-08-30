@@ -7,7 +7,9 @@
 		android:padding="14sp" 
 		/>
 	<FrameLayout android:id="@+id/view_frame"
-		android:layout_width="fill_parent" android:layout_height="fill_parent">
+		android:layout_width="fill_parent" android:layout_height="fill_parent"
+		android:background="@drawable/global_background"
+		>
 	</FrameLayout>
 
 </LinearLayout>

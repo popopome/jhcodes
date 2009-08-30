@@ -16,6 +16,7 @@ import com.jhlee.vbudget.collect.RRCollectView;
 import com.jhlee.vbudget.db.RRDbAdapter;
 import com.jhlee.vbudget.expense.RRDailyExpenseCarouselView;
 import com.jhlee.vbudget.expense.RRDetailExpenseView;
+import com.jhlee.vbudget.overview.RRMoneyOverview;
 import com.jhlee.vbudget.plan.RRBudgetMainView;
 import com.jhlee.vbudget.plan.RRDbBasedBudgetDataProvider;
 import com.jhlee.vbudget.statistics.RRStatisticsView;
@@ -91,6 +92,9 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 
 	private void performCommand(int cmdId, String cmdLabel, Object param) {
 		switch (cmdId) {
+		case RR_CMD_OVERVIEW:
+			this.setMoneyContent(getOverviewView(cmdId, cmdLabel));
+			break;
 		case RR_CMD_COLLECT: {
 			this.setMoneyContent(getCollectView(cmdId, cmdLabel));
 			
@@ -110,6 +114,17 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 			this.setMoneyContent(getStatisticsView(cmdId, cmdLabel));
 			break;
 		}
+	}
+	
+	private View getOverviewView(int cmdId, String cmdLabel) {
+		RRMoneyOverview view = (RRMoneyOverview)mContentViewPool.get(cmdId);
+		if(null == view) {
+			view = new RRMoneyOverview(this);
+			view.initialize(mDbAdapter);
+			mContentViewPool.put(cmdId, view);
+		}
+		
+		return view;
 	}
 	
 	/*

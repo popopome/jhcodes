@@ -518,6 +518,33 @@ public class RRDbAdapter {
 				"year, month");
 		return c;
 	}
+	
+	public Cursor queryCurrentMonthBudget() {
+		Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
+		int year = cal.get(Calendar.YEAR);
+		int month = cal.get(Calendar.MONTH)+1;
+		
+		Cursor c = mDb.query(TABLE_BUDGET, new String[] { "_id", "year",
+				"month", "count(_id)", "sum(budget_amount)",
+				"sum(budget_balance)", "max(budget_amount)",
+				"max(budget_balance)" }, "year=" + year + " and month=" + month, null, "year, month", null,
+				"year, month");
+		c.moveToFirst();
+		mOwnerActivity.startManagingCursor(c);
+		return c;
+	}
+	
+	public Cursor queryCurrentMonthBudgetItems() {
+		Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
+		int year = cal.get(Calendar.YEAR);
+		int month = cal.get(Calendar.MONTH)+1;
+		
+		Cursor c = mDb.query(TABLE_BUDGET, null, "year=" + year + " and month=" + month, null, null, null,
+				"budget_name");
+		c.moveToFirst();
+		mOwnerActivity.startManagingCursor(c);
+		return c;
+	}
 
 	public boolean insertBudgetItem(int year, int month, String name,
 			long amount) {

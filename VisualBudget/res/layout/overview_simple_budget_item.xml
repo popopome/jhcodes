@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/LinearLayout01"
+	android:layout_width="fill_parent" android:layout_height="wrap_content"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:padding="5px"
+	>
+	<TextView android:id="@+id/budget_name"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:textColor="#ff262c26"
+		></TextView>
+	<TextView android:id="@+id/budget_guide"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:textColor="#ff999999"
+		></TextView>
+	<TextView android:id="@+id/budget_balance"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:textColor="#ff262c26"
+		></TextView>
+</LinearLayout>
