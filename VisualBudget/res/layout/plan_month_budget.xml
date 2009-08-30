@@ -10,6 +10,7 @@
     	android:id="@+id/budget_list"
     	android:layout_width="fill_parent"
     	android:layout_height="wrap_content"
+    	android:cacheColorHint="#00000000"
     	>
 	</ListView>
 </LinearLayout>

@@ -50,6 +50,7 @@ public class RRBudgetSelectDialog extends Dialog {
 
 		});
 
+		this.setTitle("SELECT BUDGET");
 		setUpMonthBudgetView();
 	}
 

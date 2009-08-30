@@ -134,8 +134,14 @@ public class RRMoneyOverview extends FrameLayout {
 
 		Cursor c = mDbAdapter.queryCurrentMonthBudget();
 		if (c != null) {
-			long balance = c.getLong(RRDbAdapter.COL_BUDGET_BALANCE);
-			long total = c.getLong(RRDbAdapter.COL_BUDGET_AMOUNT);
+			long balance = 0;
+			long total = 0;
+			if(c.getCount() >= 1) {
+				balance = c.getLong(RRDbAdapter.COL_BUDGET_BALANCE);
+				total = c.getLong(RRDbAdapter.COL_BUDGET_AMOUNT);	
+			}
+			c.close();
+			
 			mBudgetBalanceTextView.setText(RRUtil.formatMoney(balance / 100,
 					balance % 100, true));
 			mBudgetAmountTextView.setText(RRUtil.formatMoney(total / 100,

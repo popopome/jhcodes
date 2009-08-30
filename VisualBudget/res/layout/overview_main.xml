@@ -69,8 +69,8 @@
 		</LinearLayout>
 		<ProgressBar android:id="@+id/budget_progress_bar"
 			android:layout_width="fill_parent" android:layout_height="wrap_content"
-			style="@style/progressbar.horizontal" android:max="100"
-			android:progress="50" android:layout_marginBottom="5px" />
+			style="@style/progressbar.horizontal"
+			android:layout_marginBottom="5px" />
 		<LinearLayout android:layout_width="fill_parent"
 			android:layout_height="wrap_content" android:orientation="horizontal">
 			<TextView android:layout_width="wrap_content"

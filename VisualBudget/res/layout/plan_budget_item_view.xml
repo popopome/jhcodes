@@ -2,26 +2,44 @@
 <LinearLayout android:id="@+id/LinearLayout01"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical">
-	<LinearLayout android:id="@+id/LinearLayout02"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:orientation="horizontal">
+	android:orientation="horizontal" android:paddingLeft="5px"
+	android:paddingRight="5px"
+	android:gravity="center_vertical"
+	>
+	<LinearLayout android:id="@+id/LinearLayout01"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_weight="1"
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical" 
+		>
+		<LinearLayout android:id="@+id/LinearLayout02"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
+			android:orientation="horizontal">
 
-		<TextView android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:id="@+id/budget_name"
-			android:layout_weight="1.0" android:hint="Budget name"></TextView>
-		<TextView android:id="@+id/budget_amount"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:hint="Budget amount"></TextView>
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:id="@+id/budget_name"
+				android:layout_weight="1.0" android:hint="Budget name"
+				style="@style/Widget.TextView.BudgetItemName"></TextView>
+			<TextView android:id="@+id/budget_amount"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:hint="Budget amount" android:textColor="#FF3C5446"
+				android:paddingRight="5px"
+				android:textStyle="bold|italic"></TextView>
 
-		<Button android:text="Delete" android:id="@+id/button_delete"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:focusable="false"
-			></Button>
+		</LinearLayout>
+
+		<ProgressBar android:id="@+id/budget_progress"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
+			style="@style/progressbar.horizontal" android:layout_marginBottom="5px"
+			clickable="false" />
 	</LinearLayout>
 
-	<ProgressBar android:layout_height="wrap_content"
-		android:clickable="false" android:scrollbarAlwaysDrawHorizontalTrack="true"
-		android:layout_width="fill_parent" android:id="@+id/budget_progress"
-		style="?android:attr/progressBarStyleHorizontal"></ProgressBar>
+	<Button android:id="@+id/button_delete" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:focusable="false"
+		android:background="@drawable/item_delete_bg_state"
+		
+		android:paddingLeft="5px"
+		
+		></Button>
+
 </LinearLayout>

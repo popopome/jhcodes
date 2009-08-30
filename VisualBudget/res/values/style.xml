@@ -28,7 +28,29 @@
 		<item name="android:shadowRadius">2.0</item>
 		<item name="android:textSize">22.0sp</item>
 	</style>
+	<style name="Widget.TextView.BudgetItemName" parent="android:Widget.TextView">
+		<item name="android:textColor">#ffffffff</item>
+		<item name="android:shadowColor">#ff000000</item>
+		<item name="android:shadowRadius">2.0</item>
+		<item name="android:textSize">20.0sp</item>
+		<item name="android:paddingLeft">5sp</item>
+		<item name="android:paddingRight">5sp</item>
+	</style>
 	<style name="Widget.TextView.ContentText" parent="android:Widget.TextView">
 		<item name="android:textSize">20.0sp</item>
+	</style>
+
+	<style name="Widget.TabWidget.Budgeting" parent="android:Widget.TabWidget">
+		<item name="android:textAppearance">@style/TextAppearance.Widget.TabWidget.Budgeting
+		</item>
+		
+	</style>
+	<style name="TextAppearance.Widget.TabWidget.Budgeting" parent="android:TextAppearance.Widget.TabWidget">
+		<item name="android:textSize">18sp</item>
+		<item name="android:textStyle">normal</item>
+		<item name="android:shadowColor">#88000000</item>
+		<item name="android:shadowRadius">2.0</item>
+		<item name="android:textColor">@color/budget_tab_indicator_text
+		</item>
 	</style>
 </resources>

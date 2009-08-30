@@ -26,10 +26,10 @@ public class RRNumpad extends View {
 	public static final int SYMBOL_7 = 7;
 	public static final int SYMBOL_8 = 8;
 	public static final int SYMBOL_9 = 9;
-	public static final int SYMBOL_CANCEL = 10;
-	public static final int SYMBOL_OK = 11;
-	public static final int SYMBOL_CLEAR = 12;
-	public static final int SYMBOL_BACK = 13;
+	public static final int SYMBOL_BACK = 10;
+	public static final int SYMBOL_CLEAR = 11;
+	public static final int SYMBOL_CANCEL = 12;
+	public static final int SYMBOL_OK = 13;
 	public static final int SYMBOL_DOT = 14;
 
 	public interface OnNumPadClickListener {

@@ -1,24 +1,26 @@
 package com.jhlee.vbudget;
 
-import android.app.TabActivity;
+import android.app.Activity;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.TabHost;
+import android.widget.TabWidget;
 import android.widget.TextView;
 
 import com.jhlee.vbudget.collect.RRCollectView;
 import com.jhlee.vbudget.db.RRDbAdapter;
 import com.jhlee.vbudget.expense.RRDailyExpenseCarouselView;
-import com.jhlee.vbudget.expense.RRDetailExpenseView;
 import com.jhlee.vbudget.overview.RRMoneyOverview;
 import com.jhlee.vbudget.plan.RRBudgetMainView;
 import com.jhlee.vbudget.plan.RRDbBasedBudgetDataProvider;
 import com.jhlee.vbudget.statistics.RRStatisticsView;
 import com.jhlee.vbudget.util.RRUtil;
 
-public class Budgeting extends TabActivity implements TabHost.TabContentFactory {
+public class Budgeting extends Activity implements TabHost.TabContentFactory {
 
 	private static final String TAG = "Budgeting";
 	private static final String VIEW_TAG_OVERVIEW = "overview";
@@ -28,11 +30,8 @@ public class Budgeting extends TabActivity implements TabHost.TabContentFactory 
 
 	/* Db adapter */
 	private RRDbAdapter mDbAdapter;
-	/* Command bar */
-	private RRCommandBar mCmdBar;
-
-	/* Active view index */
-	private int mActiveViewIndex = -1;
+	
+	private TabHost	mTabHost;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +39,17 @@ public class Budgeting extends TabActivity implements TabHost.TabContentFactory 
 
 		/* No title */
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		
+		this.setContentView(R.layout.budgeting);
 
 		/* Initialize Db */
 		mDbAdapter = new RRDbAdapter(this);
 		mDbAdapter.setOwner(this);
 
-		final TabHost tabHost = getTabHost();
+		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
+		final TabHost tabHost = mTabHost;
+		tabHost.setup();
+
 		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_OVERVIEW)
 		// .setIndicator("Overview",
 				// getResources().getDrawable(R.drawable.star_big_on))
@@ -56,10 +60,24 @@ public class Budgeting extends TabActivity implements TabHost.TabContentFactory 
 				.setIndicator("Budgeting").setContent(this));
 		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_STATISTICS).setIndicator(
 				"Statistics").setContent(this));
+
+		
+		
 		
 		/* Set background */
-		tabHost.setBackgroundResource(R.drawable.global_background);
+		TabWidget tabWidget = tabHost.getTabWidget();
+		tabWidget.setBackgroundColor(0xff00853E);
+		tabHost.getTabContentView().setBackgroundResource(R.drawable.global_background);
 		
+		/* Change text style */
+		int cnt = tabWidget.getChildCount();
+		for(int pos=cnt-1;pos>=0;--pos) {
+			View view = tabWidget.getChildAt(pos);
+			TextView titleView = (TextView) view.findViewById(android.R.id.title);
+			titleView.setTextColor(Color.WHITE);
+			titleView.setShadowLayer((float) 2.0, 0, 0, Color.BLACK);
+			titleView.setPadding(2, 0, 2, 0);
+		}
 	}
 
 	/** {@inheritDoc} */

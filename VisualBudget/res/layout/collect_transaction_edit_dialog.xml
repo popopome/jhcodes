@@ -43,7 +43,7 @@
 
 				<TextView android:layout_width="wrap_content"
 					android:layout_height="wrap_content" android:layout_weight="1.0"
-					android:inputType="textMultiLine" android:text="Description about expense. Tag it!"
+					android:inputType="textMultiLine" android:text="Describe your expense. Tag it."
 					android:textSize="20.0sp" android:id="@+id/tag_list"></TextView>
 				<Button android:layout_width="wrap_content"
 					android:layout_height="wrap_content" android:text="Show tags"

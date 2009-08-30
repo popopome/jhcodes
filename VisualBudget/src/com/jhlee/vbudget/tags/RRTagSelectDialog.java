@@ -27,7 +27,7 @@ public class RRTagSelectDialog extends Dialog {
 
 	public RRTagSelectDialog(Context context) {
 		super(context);
-		this.setTitle("Select tag");
+		this.setTitle("SELECT TAG");
 	}
 
 	public boolean initialize(RRTagDataProvider provider) {
@@ -109,7 +109,6 @@ public class RRTagSelectDialog extends Dialog {
 			}
 		});
 		
-		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.setContentView(view, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.FILL_PARENT));
 		

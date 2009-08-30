@@ -45,7 +45,7 @@ public class RRTransactionEditDialog extends Dialog {
 	public void initialize(RRDbAdapter dbAdapter) {
 		mDbAdapter = dbAdapter;
 		this.setContentView(R.layout.collect_transaction_edit_dialog);
-		this.setTitle("Enter expense");
+		this.setTitle("ENTER EXPENSE");
 
 		mBudgetBrowseButton = (Button) findViewById(R.id.button_budget_browse);
 		mMoneyPadButton = (Button) findViewById(R.id.button_numpad);
