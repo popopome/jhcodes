@@ -674,7 +674,7 @@ public class RRDbAdapter {
 		ContentValues val = new ContentValues();
 		val.put(KEY_BUDGET_BALANCE, balance);
 		int rowCnt = mDb.update(TABLE_BUDGET, val, "_id=" + budgetId, null);
-		if(rowCnt != -1) {
+		if(rowCnt != 1) {
 			Log.e(TAG, "Unable to update budget blance:budgetId=" + budgetId + ", budgetBalance=" + balance);
 			return false;
 		}

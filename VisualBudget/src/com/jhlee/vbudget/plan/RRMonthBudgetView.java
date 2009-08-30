@@ -264,8 +264,7 @@ public class RRMonthBudgetView extends LinearLayout {
 				}
 				if (1 == position) {
 					long totalMoney = mProvider.getBudgetAmount(mYear, mMonth);
-					String moneyStr = RRUtil.formatMoney(totalMoney / 100,
-							totalMoney % 100, true);
+					String moneyStr = RRUtil.formatMoney(totalMoney, true);
 					textView.setText(moneyStr);
 					return textView;
 				}

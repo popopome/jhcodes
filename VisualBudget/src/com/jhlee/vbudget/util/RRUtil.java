@@ -40,6 +40,12 @@ public class RRUtil {
 		return mGMTDataFormatter.format(new Date(timeInMillis));
 	}
 	
+	
+	public static String formatMoney(long fixed, boolean useDollarSign) {
+		long sign = (fixed < 0) ? -1 : 1;
+		long absFixed = Math.abs(fixed);
+		return formatMoney(sign*(absFixed/100), absFixed%100, useDollarSign);
+	}
 	public static String formatMoney(long l, long m, boolean useDollarSign) {
 		StringBuilder sb = new StringBuilder();
 		if(useDollarSign)

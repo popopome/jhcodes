@@ -223,7 +223,7 @@ public class RRBudgetEditDialog extends Dialog {
 		}
 		mIsEditMode = true;
 		mNewNameBtn.setVisibility(View.GONE);
-		mBudgetAmountButton.setText(RRUtil.formatMoney(budgetAmount/100, budgetAmount%100, true));
+		mBudgetAmountButton.setText(RRUtil.formatMoney(budgetAmount, true));
 
 		mBudgetSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 

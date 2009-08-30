@@ -455,8 +455,7 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 			mPaint.setColor(Color.WHITE);
 			mPaint.setTextAlign(Paint.Align.CENTER);
 
-			String moneyString = RRUtil.formatMoney((int) total / 100,
-					(int) total % 100, true);
+			String moneyString = RRUtil.formatMoney(total, true);
 			canvas
 					.drawText(moneyString, item.x, y + item.h + TEXT_SIZE,
 							mPaint);

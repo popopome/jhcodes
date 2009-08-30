@@ -121,7 +121,7 @@ public class RRStatisticsView extends FrameLayout implements RRBudgetContent {
 		public String getBarTitle(int position) {
 			mCursor.moveToPosition(position);
 			long expense = mCursor.getLong(COL_TOTAL);
-			return RRUtil.formatMoney(expense / 100, expense % 100, true);
+			return RRUtil.formatMoney(expense, true);
 		}
 
 		public long getBarValue(int position) {
@@ -176,7 +176,7 @@ public class RRStatisticsView extends FrameLayout implements RRBudgetContent {
 		public String getBarTitle(int position) {
 			mCursor.moveToPosition(position);
 			long expense = mCursor.getLong(COL_EXPENSE);
-			return RRUtil.formatMoney(expense / 100, expense % 100, true);
+			return RRUtil.formatMoney(expense, true);
 		}
 
 		public long getBarValue(int position) {
@@ -205,9 +205,6 @@ public class RRStatisticsView extends FrameLayout implements RRBudgetContent {
 			}
 			mCursor = mDbAdapter.queryExpenseDayByDay();
 			mCursor.moveToFirst();
-			while (mCursor.isAfterLast()) {
-				mCursor.moveToNext();
-			}
 		}
 
 	}

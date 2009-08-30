@@ -178,8 +178,7 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 			}
 
 			budgetNameView.setText(budgetName);
-			budgetBalanceView.setText(RRUtil.formatMoney(balance / 100,
-					balance % 100, true));
+			budgetBalanceView.setText(RRUtil.formatMoney(balance, true));
 			return convertView;
 		}
 
@@ -206,10 +205,8 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 			}
 			c.close();
 			
-			mBudgetBalanceTextView.setText(RRUtil.formatMoney(balance / 100,
-					balance % 100, true));
-			mBudgetAmountTextView.setText(RRUtil.formatMoney(total / 100,
-					total % 100, true));
+			mBudgetBalanceTextView.setText(RRUtil.formatMoney(balance, true));
+			mBudgetAmountTextView.setText(RRUtil.formatMoney(total, true));
 			mBudgetAmountTextView.requestLayout();
 
 			mBudgetProgress.setMax((int) total);

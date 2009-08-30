@@ -52,10 +52,8 @@ public class RRBudgetItemView extends FrameLayout {
 
 		mBudgetNameTextView.setText(mBudgetName);
 
-		String balanceStr = RRUtil.formatMoney(mBudgetBalance / 100,
-				mBudgetBalance % 100, true);
-		String totalStr = RRUtil.formatMoney(mBudgetAmount / 100,
-				mBudgetAmount % 100, true);
+		String balanceStr = RRUtil.formatMoney(mBudgetBalance, true);
+		String totalStr = RRUtil.formatMoney(mBudgetAmount, true);
 
 		mBudgetAmountTextView.setText(balanceStr + "/" + totalStr);
 		mPrgBar.setMax((int) mBudgetAmount);

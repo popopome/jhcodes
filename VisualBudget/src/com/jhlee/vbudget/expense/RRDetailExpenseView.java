@@ -141,7 +141,7 @@ public class RRDetailExpenseView extends FrameLayout {
 		TextView moneyView = (TextView) findViewById(R.id.money_view);
 		int total = mCursor.getInt(mCursor
 				.getColumnIndex(RRDbAdapter.KEY_RECEIPT_TOTAL));
-		moneyView.setText(RRUtil.formatMoney(total / 100, total % 100, true));
+		moneyView.setText(RRUtil.formatMoney(total, true));
 		moneyView.invalidate();
 	}
 
