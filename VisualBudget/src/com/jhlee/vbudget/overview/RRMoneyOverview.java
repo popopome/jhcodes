@@ -123,9 +123,6 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 				dlg.show();
 			}
 		});
-
-		/* Fill data */
-		refreshContent();
 	}
 
 	private class RRSimpleBudgetAdapter extends BaseAdapter {

@@ -25,8 +25,6 @@ import android.widget.Toast;
 
 import com.jhlee.vbudget.R;
 import com.jhlee.vbudget.RRBudgetContent;
-import com.jhlee.vbudget.VisualBudget;
-import com.jhlee.vbudget.VisualBudget.RRMoneyContentHost;
 import com.jhlee.vbudget.db.RRDbAdapter;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.OnCarouselActiveItemChanged;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.OnCarouselActiveItemClickListener;
@@ -43,12 +41,16 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 
 	private FrameLayout	mFrameView;
 	private RRCarouselFlowView mCarouselView;
+	
+	private View mExpenseWrapperViewGroup;
+	private View mEmptyDataView;
+	
 	private RRDbAdapter mAdapter;
 	private Cursor mCursor;
 	/*
 	 * Content host
 	 */
-	private RRMoneyContentHost mHost;
+
 	private HashMap<String, Bitmap> mBmpPool = new HashMap<String, Bitmap>();
 
 	private Matrix mMatrixZoomToFit = new Matrix();
@@ -75,6 +77,8 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		mFrameView = (FrameLayout) RRUtil.createViewsFromLayout(getContext(),
 				R.layout.expense_carousel, this);
 		mCarouselView = (RRCarouselFlowView) mFrameView.findViewById(R.id.carouselView);
+		mExpenseWrapperViewGroup = mFrameView.findViewById(R.id.expense_wrapper);
+		mEmptyDataView = mFrameView.findViewById(R.id.expense_empty);
 
 //		/* Install back button listener */
 //		Button backButton = (Button) mFrameView.findViewById(R.id.back_button);
@@ -87,24 +91,9 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 
 		/* Collect receipt data from database */
 		mAdapter = dbAdapter;
-		refreshContent();
-		int numOfReceipts = mCursor.getCount();
-		if (numOfReceipts < 1) {
-			/* TODO: Show receipt data first */
-			Log.e(TAG, "NO RECEIPT DATA-----------------!");
-			
-			/*
-			 * No data is in there. Just finisth the activity.
-			 */
-			Toast.makeText(getContext(),
-					"No expense data. Please enter your expesnes first.",
-					Toast.LENGTH_LONG).show();
-			return false;
-		}
-
+		
 		/* Initialize carousel view */
 		final RRCarouselFlowView carouselView = (RRCarouselFlowView) findViewById(R.id.carouselView);
-		carouselView.initialize(numOfReceipts, 120, 160, 60, 9, 25);
 		carouselView.setFocusable(true);
 		carouselView.setOnActiveItemClickListener(this);
 		carouselView.setOnActiveItemChangeListener(this);
@@ -124,6 +113,27 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 
 		/* Give default focus to carousel view */
 		carouselView.requestFocus();
+		
+		/* Let's check there is data or not. */
+		return showViewByDataExistence();
+	}
+
+	/*
+	 * Show view by data existence
+	 */
+	private boolean showViewByDataExistence() {
+		Cursor c = mAdapter.queryAllReceipts();
+		int numTrans = c.getCount();
+		if(numTrans < 1) {
+			/* No expense data.
+			 * We return false.
+			 */
+			mExpenseWrapperViewGroup.setVisibility(View.GONE);
+			mEmptyDataView.setVisibility(View.VISIBLE);
+			return false;
+		}
+		mExpenseWrapperViewGroup.setVisibility(View.VISIBLE);
+		mEmptyDataView.setVisibility(View.GONE);
 
 		return true;
 	}
@@ -264,14 +274,6 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		});
 	}
 	
-	/*
-	 * Set money content host
-	 */
-	public void setMoneyContentHost(RRMoneyContentHost host) {
-		Assert.assertTrue(host != null);
-		mHost = host;
-	}
-
 
 	/*
 	 * Refresh content
@@ -283,7 +285,20 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 			mCursor = null;
 		}
 		mCursor = mAdapter.queryAllReceipts();
+		int numOfReceipts = mCursor.getCount();
+		if (numOfReceipts > 0) {
+			/* Initialize carousel view */
+			final RRCarouselFlowView carouselView = (RRCarouselFlowView) findViewById(R.id.carouselView);
+			carouselView.initialize(numOfReceipts, 120, 160, 60, 9, 25);
+		} else {
+			/* TODO: Show receipt data first */
+			Log.e(TAG, "NO expense data-----------------!");
+		}
 		
+		/*
+		 * Show view by data data existence
+		 */
+		showViewByDataExistence();
 	}
 
 	/**
@@ -312,9 +327,9 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		 * i.putExtra(RRReceiptDetailActivity.RECEIPT_ID, rid);
 		 * this.startActivity(i);
 		 */
-		if(mHost != null) {
-			mHost.showMoneyContent(VisualBudget.RR_CMD_DETAIL_EXPENSE, rid, null);
-		}
+//		if(mHost != null) {
+//			mHost.showMoneyContent(VisualBudget.RR_CMD_DETAIL_EXPENSE, rid, null);
+//		}
 	}
 
 	/*

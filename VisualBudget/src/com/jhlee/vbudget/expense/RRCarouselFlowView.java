@@ -339,6 +339,11 @@ public class RRCarouselFlowView extends View {
 		 * If there is custom drawer, then use it.
 		 */
 		RRCarouselItem activeItem = this.getActiveItem();
+		if(null == activeItem) {
+			/* There is no item at here */
+			return;
+		}
+		
 		if (null != mOnCustomDrawListener) {
 			for (RRCarouselItem item : mSortedItems) {
 				mOnCustomDrawListener.onDraw(this, canvas, item,
@@ -408,6 +413,8 @@ public class RRCarouselFlowView extends View {
 
 		/** Get active item */
 		RRCarouselItem activeItem = getActiveItem();
+		if(null == activeItem)
+			return;
 
 		/** Update each item's virtual position */
 		for (RRCarouselItem item : this.mItems) {
@@ -426,11 +433,18 @@ public class RRCarouselFlowView extends View {
 		int curX = (int) event.getX();
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
+			/* Keep mouse down item */
+			RRCarouselItem item = getActiveItem();
+			if(null == item) {
+				/* Nothing is available at here */
+				return false;
+			}
+			
+			mActiveSeqAtMouseDown = item.seq;
 			mLastMouseX = curX;
 			mMouseDownX = curX;
 
-			/* Keep mouse down item */
-			mActiveSeqAtMouseDown = getActiveItem().seq;
+			
 			/* Keep mouse down times */
 			mMouseDownMillis = Calendar.getInstance().getTimeInMillis();
 			break;
@@ -445,7 +459,6 @@ public class RRCarouselFlowView extends View {
 			long mouseUpMillis = Calendar.getInstance().getTimeInMillis();
 
 			/** Align to current active item */
-			RRCarouselItem item = null;
 			int itemSeq = 0;
 			int delta = curX - mMouseDownX;
 			if (Math.abs(delta) < FINGER_CLICK_THRESHOLD) {
@@ -529,6 +542,9 @@ public class RRCarouselFlowView extends View {
 	 * @return
 	 */
 	public RRCarouselItem getActiveItem() {
+		if(null == mSortedItems)
+			return null;
+		
 		if (mSortedItems.isEmpty())
 			return null;
 

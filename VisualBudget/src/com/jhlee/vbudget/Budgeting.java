@@ -11,9 +11,7 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.TabHost.OnTabChangeListener;
-import android.widget.TabHost.TabContentFactory;
 
-import com.jhlee.vbudget.collect.RRCollectView;
 import com.jhlee.vbudget.db.RRDbAdapter;
 import com.jhlee.vbudget.expense.RRDailyExpenseCarouselView;
 import com.jhlee.vbudget.overview.RRMoneyOverview;
@@ -29,19 +27,23 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 	private static final String VIEW_TAG_EXPENSES = "expenses";
 	private static final String VIEW_TAG_BUDGETING = "budgeting";
 	private static final String VIEW_TAG_STATISTICS = "statistics";
+	private static final String VIEW_TAG_EMPTY_EXPENSES = "empty_expenses";
 
 	/* Db adapter */
 	private RRDbAdapter mDbAdapter;
-	
-	private TabHost	mTabHost;
-	
+
+	private TabHost mTabHost;
+
+	/*
+	 * Activity is created. Initialize stuffs
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		/* No title */
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		
+
 		this.setContentView(R.layout.budgeting);
 
 		/* Initialize Db */
@@ -56,27 +58,40 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 		// .setIndicator("Overview",
 				// getResources().getDrawable(R.drawable.star_big_on))
 				.setIndicator("Overview").setContent(this));
-		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_EXPENSES).setIndicator("Expenses")
-				.setContent(this));
-		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_BUDGETING)
-				.setIndicator("Budgeting").setContent(this));
+		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_EXPENSES).setIndicator(
+				"Expenses").setContent(this));
+		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_BUDGETING).setIndicator(
+				"Budgeting").setContent(this));
 		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_STATISTICS).setIndicator(
 				"Statistics").setContent(this));
-		
+
 		/* Add tab change event handler */
 		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
 
 			/* Tab is changed */
 			@Override
 			public void onTabChanged(String tabId) {
+				RRBudgetContent content;
+
 				/* Find view */
 				FrameLayout frame = tabHost.getTabContentView();
 				int cnt = frame.getChildCount();
-				for(int pos=cnt-1;pos>=0;--pos) {
-					View child = frame.getChildAt(pos);
+				int pos = cnt - 1;
+				View child = null;
+				for (; pos >= 0; --pos) {
+					child = frame.getChildAt(pos);
+					/*
+					 * View can have no tag.
+					 */
 					String viewTag = (String) child.getTag();
-					if(0 == viewTag.compareToIgnoreCase(tabId)) {
-						((RRBudgetContent)child).refreshContent();
+					if (null == viewTag) {
+						continue;
+					}
+
+					if (0 == viewTag.compareToIgnoreCase(tabId)) {
+						content = (RRBudgetContent) child;
+						content.refreshContent();
+						return;
 					}
 				}
 			}
@@ -85,13 +100,15 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 		/* Set background */
 		TabWidget tabWidget = tabHost.getTabWidget();
 		tabWidget.setBackgroundColor(0xff00853E);
-		tabHost.getTabContentView().setBackgroundResource(R.drawable.global_background);
-		
+		tabHost.getTabContentView().setBackgroundResource(
+				R.drawable.global_background);
+
 		/* Change text style */
 		int cnt = tabWidget.getChildCount();
-		for(int pos=cnt-1;pos>=0;--pos) {
+		for (int pos = cnt - 1; pos >= 0; --pos) {
 			View view = tabWidget.getChildAt(pos);
-			TextView titleView = (TextView) view.findViewById(android.R.id.title);
+			TextView titleView = (TextView) view
+					.findViewById(android.R.id.title);
 			titleView.setTextColor(Color.WHITE);
 			titleView.setShadowLayer((float) 2.0, 0, 0, Color.BLACK);
 			titleView.setPadding(2, 0, 2, 0);
@@ -101,38 +118,34 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 	/** {@inheritDoc} */
 	public View createTabContent(String tag) {
 		View view = null;
-		
-		if(0 == tag.compareTo(VIEW_TAG_OVERVIEW)) {
+
+		if (0 == tag.compareTo(VIEW_TAG_OVERVIEW)) {
 			view = getOverviewView();
-		} else if(0 == tag.compareTo(VIEW_TAG_EXPENSES)) {
-			view = getCarouselView();
-		} else if(0 == tag.compareTo(VIEW_TAG_BUDGETING)) {
+		} else if (0 == tag.compareTo(VIEW_TAG_EXPENSES)) {
+			view = getExpenseView();
+		} else if (0 == tag.compareTo(VIEW_TAG_BUDGETING)) {
 			view = getPlanView();
-		} else if(0 == tag.compareTo(VIEW_TAG_STATISTICS)) {
+		} else if (0 == tag.compareTo(VIEW_TAG_STATISTICS)) {
 			view = getStatisticsView();
 		} else {
 			return null;
 		}
-		
-		view.setTag(tag);
+
 		return view;
 	}
 
 	private View getOverviewView() {
 		RRMoneyOverview view = new RRMoneyOverview(this);
 		view.initialize(mDbAdapter);
+		view.setTag(VIEW_TAG_OVERVIEW);
+
+		/*
+		 * For overview case, I call refresh content explicitly at here. At very
+		 * first time Android tab widget does not give tab change event.
+		 */
+		view.refreshContent();
 
 		return view;
-	}
-
-	/*
-	 * Get collect view
-	 */
-	private View getCollectView() {
-		/* Find plan content view */
-		RRCollectView collectView = new RRCollectView(this);
-		collectView.initialize(mDbAdapter);
-		return collectView;
 	}
 
 	/*
@@ -144,51 +157,55 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 		RRDbBasedBudgetDataProvider dataProvider = new RRDbBasedBudgetDataProvider(
 				mDbAdapter);
 		budgetView.setBudgetDataProvider(dataProvider);
+		budgetView.setTag(VIEW_TAG_BUDGETING);
 		return budgetView;
 	}
 
 	/*
 	 * Carousel expense view
 	 */
-	private View getCarouselView() {
+	private View getExpenseView() {
 		RRDailyExpenseCarouselView carouselView = new RRDailyExpenseCarouselView(
 				this);
-		if (false == carouselView.initializeViews(mDbAdapter)) {
-			Log.e(TAG, "Unable to initialize carousel view");
-			/* Let's return empty data */
-			return RRUtil.createViewsFromLayout(this, R.layout.empty_data_guide, null);
-		}
+		carouselView.initializeViews(mDbAdapter);
+//		if (false == carouselView.initializeViews(mDbAdapter)) {
+//			Log.e(TAG, "Unable to initialize carousel view");
+//			/* Let's return empty data */
+//			return RRUtil.createViewsFromLayout(this,
+//					R.layout.empty_data_guide, null);
+//		}
 
+		carouselView.setTag(VIEW_TAG_EXPENSES);
 		return carouselView;
 	}
 
-//	/*
-//	 * Get detail view
-//	 */
-//	private View getDetailView() {
-//
-//		/*
-//		 * If expense id is not given, here the program uses latest expense.
-//		 */
-//		Integer expenseId;
-//		if (null == param) {
-//			expenseId = mDbAdapter.queryLatestExpenseId();
-//			if (-1 == expenseId) {
-//				/* TODO: return empty view. */
-//				return null;
-//			}
-//		} else {
-//			/*
-//			 * ?? I don't know java well. Following code is somewhat silly.
-//			 */
-//			long val = (Long) param;
-//			expenseId = (int) val;
-//		}
-//
-//		RRDetailExpenseView detailView = new RRDetailExpenseView(this);
-//		detailView.setExpense(mDbAdapter, expenseId);
-//		return detailView;
-//	}
+	// /*
+	// * Get detail view
+	// */
+	// private View getDetailView() {
+	//
+	// /*
+	// * If expense id is not given, here the program uses latest expense.
+	// */
+	// Integer expenseId;
+	// if (null == param) {
+	// expenseId = mDbAdapter.queryLatestExpenseId();
+	// if (-1 == expenseId) {
+	// /* TODO: return empty view. */
+	// return null;
+	// }
+	// } else {
+	// /*
+	// * ?? I don't know java well. Following code is somewhat silly.
+	// */
+	// long val = (Long) param;
+	// expenseId = (int) val;
+	// }
+	//
+	// RRDetailExpenseView detailView = new RRDetailExpenseView(this);
+	// detailView.setExpense(mDbAdapter, expenseId);
+	// return detailView;
+	// }
 
 	/*
 	 * Statistics view
@@ -198,6 +215,7 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 		statView.setUp(mDbAdapter);
 
 		statView.refreshContent();
+		statView.setTag(VIEW_TAG_STATISTICS);
 
 		return statView;
 	}

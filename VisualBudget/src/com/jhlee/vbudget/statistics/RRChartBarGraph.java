@@ -20,6 +20,8 @@ public class RRChartBarGraph extends RelativeLayout {
 	private TextView mTitleView;
 	private LinearLayout mGraphWrapper;
 	
+	private RRChartBarDataProvider	mDataProvider;
+	
 	public RRChartBarGraph(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		buildLayout();
@@ -43,12 +45,17 @@ public class RRChartBarGraph extends RelativeLayout {
 	/*
 	 * Set chart graph Height
 	 */
-	public void setBarMaxHeight(int graphHeight) {
+	public void setBarMaxHeight(long graphHeight) {
 		mBarStreamView.setBarHeight(graphHeight);
 		requestLayout();
 	}
 	
 	public void refreshData() {
+		/* Refresh data provider */
+		mDataProvider.refreshData();
+		setBarMaxHeight(mDataProvider.getBarMaxValue());
+		
+		/* Refresh stream internal data */
 		mBarStreamView.refreshData();
 	}
 
@@ -93,6 +100,7 @@ public class RRChartBarGraph extends RelativeLayout {
 	}
 
 	public void setChartBarDataProvider(RRChartBarDataProvider dataProvider) {
+		mDataProvider = dataProvider;
 		mBarStreamView.setChartBarDataProvider(dataProvider);
 		
 		/*

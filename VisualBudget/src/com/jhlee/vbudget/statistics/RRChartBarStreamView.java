@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Gallery;
+import android.widget.SpinnerAdapter;
 
 public class RRChartBarStreamView extends Gallery {
 
@@ -25,10 +26,11 @@ public class RRChartBarStreamView extends Gallery {
 		public String getBarValueName(int position);
 
 		public long getBarValue(int position);
+		public void refreshData();
 	}
 
 	private static final int DEFAULT_BAR_WIDTH = 80;
-	private static final int DEFAULT_BAR_HEIGHT = 200;
+	private static final long DEFAULT_BAR_HEIGHT = 200;
 	private static final int BAR_VIEW_SPACING = -1;
 	private static final int DEFAULT_BAR_VALUE_NAME_TEXT_SIZE = 16;
 	private static final int DEFAULT_TITLE_TEXT_SIZE = 9;
@@ -42,7 +44,7 @@ public class RRChartBarStreamView extends Gallery {
 	private int mTitleTextSize = DEFAULT_TITLE_TEXT_SIZE;
 	private int mBarColor = Color.LTGRAY;
 	private int mBarEdgeColor = Color.DKGRAY;
-	private int mBarHeight = DEFAULT_BAR_HEIGHT;
+	private long mBarHeight = DEFAULT_BAR_HEIGHT;
 	
 	private Paint mPaint = new Paint();
 
@@ -168,11 +170,13 @@ public class RRChartBarStreamView extends Gallery {
 		canvas.drawLine(0, y, vw, y, p);
 	}
 	
-	public void setBarHeight(int barHeight) {
+	public void setBarHeight(long barHeight) {
 		mBarHeight = barHeight;
 	}
 	
 	public void refreshData() {
-		setChartBarDataProvider(mDataProvider);
+//		setChartBarDataProvider(mDataProvider);
+		ChartBarDataAdapter adapter = (ChartBarDataAdapter)getAdapter();
+		adapter.notifyDataSetChanged();
 	}
 }
