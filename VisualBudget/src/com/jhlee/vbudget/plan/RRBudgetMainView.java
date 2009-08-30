@@ -17,8 +17,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.jhlee.vbudget.R;
+import com.jhlee.vbudget.RRBudgetContent;
 
-public class RRBudgetMainView extends LinearLayout {
+public class RRBudgetMainView extends LinearLayout implements RRBudgetContent {
 	
 	private static final int BASE_YEAR	=	2009;
 	private static final int BASE_MONTH = 1;
@@ -101,14 +102,16 @@ public class RRBudgetMainView extends LinearLayout {
 	}
 	
 	/*
-	 * Refresh data
+	 * Refresh content data
 	 */
-	public void refreshData()
-	{
+	@Override
+	public void refreshContent() {
 		if(mProvider != null)
 			mProvider.refreshData();
 	}
-	
+
+
+
 	private class RRYearMonthAdapter extends BaseAdapter {
 
 		private static final int	BASE_YEAR = 2009;

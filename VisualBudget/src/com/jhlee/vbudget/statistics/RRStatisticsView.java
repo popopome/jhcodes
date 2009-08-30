@@ -7,11 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.jhlee.vbudget.RRBudgetContent;
 import com.jhlee.vbudget.db.RRDbAdapter;
 import com.jhlee.vbudget.statistics.RRChartBarStreamView.RRChartBarDataProvider;
 import com.jhlee.vbudget.util.RRUtil;
 
-public class RRStatisticsView extends FrameLayout {
+public class RRStatisticsView extends FrameLayout implements RRBudgetContent {
 	
 	private RRDbAdapter	mDbAdapter;
 
@@ -35,12 +36,6 @@ public class RRStatisticsView extends FrameLayout {
 						ViewGroup.LayoutParams.FILL_PARENT,
 						ViewGroup.LayoutParams.FILL_PARENT));
 	}
-	
-	public void refreshData() {
-		RRChartBarGraph graph = (RRChartBarGraph) this.getChildAt(0);
-		graph.refreshData();
-	}
-	
 	
 	/**
 	 * Create day-by-day expense graph
@@ -75,9 +70,20 @@ public class RRStatisticsView extends FrameLayout {
         graph.setBarMaxHeight(100);
         return graph;
 	}
-	
-	
-	
+
+	/*
+	 * Refresh content
+	 */
+	@Override
+	public void refreshContent() {
+		RRChartBarGraph graph = (RRChartBarGraph) this.getChildAt(0);
+		graph.refreshData();
+	}
+
+
+
+
+
 	public class RRDayOfWeekExpenseDataProvider implements RRChartBarDataProvider {
 		private static final int COL_DAY_OF_WEEK = 0;
 		private static final int COL_TOTAL = 1;

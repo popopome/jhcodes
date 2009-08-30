@@ -154,7 +154,7 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 					mDbAdapter);
 			budgetView.setBudgetDataProvider(dataProvider);
 		} else {
-			budgetView.refreshData();
+			budgetView.refreshContent();
 		}
 		return budgetView;
 	}
@@ -175,7 +175,7 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 			carouselView.setMoneyContentHost(mContentHost);
 			mContentViewPool.put(cmdId, carouselView);
 		} else {
-			carouselView.refreshData();
+			carouselView.refreshContent();
 		}
 
 		return carouselView;
@@ -228,7 +228,7 @@ public class VisualBudget extends Activity implements OnCommandExecuteListener {
 			mContentViewPool.put(cmdId, statView);
 		}
 
-		statView.refreshData();
+		statView.refreshContent();
 
 		return statView;
 	}

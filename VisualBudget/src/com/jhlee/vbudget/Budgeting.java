@@ -1,15 +1,17 @@
 package com.jhlee.vbudget;
 
 import android.app.Activity;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.FrameLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
+import android.widget.TabHost.OnTabChangeListener;
+import android.widget.TabHost.TabContentFactory;
 
 import com.jhlee.vbudget.collect.RRCollectView;
 import com.jhlee.vbudget.db.RRDbAdapter;
@@ -32,7 +34,7 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 	private RRDbAdapter mDbAdapter;
 	
 	private TabHost	mTabHost;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -60,10 +62,26 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 				.setIndicator("Budgeting").setContent(this));
 		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_STATISTICS).setIndicator(
 				"Statistics").setContent(this));
+		
+		/* Add tab change event handler */
+		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
 
-		
-		
-		
+			/* Tab is changed */
+			@Override
+			public void onTabChanged(String tabId) {
+				/* Find view */
+				FrameLayout frame = tabHost.getTabContentView();
+				int cnt = frame.getChildCount();
+				for(int pos=cnt-1;pos>=0;--pos) {
+					View child = frame.getChildAt(pos);
+					String viewTag = (String) child.getTag();
+					if(0 == viewTag.compareToIgnoreCase(tabId)) {
+						((RRBudgetContent)child).refreshContent();
+					}
+				}
+			}
+		});
+
 		/* Set background */
 		TabWidget tabWidget = tabHost.getTabWidget();
 		tabWidget.setBackgroundColor(0xff00853E);
@@ -82,16 +100,22 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 
 	/** {@inheritDoc} */
 	public View createTabContent(String tag) {
+		View view = null;
+		
 		if(0 == tag.compareTo(VIEW_TAG_OVERVIEW)) {
-			return getOverviewView();
+			view = getOverviewView();
 		} else if(0 == tag.compareTo(VIEW_TAG_EXPENSES)) {
-			return getCarouselView();
+			view = getCarouselView();
 		} else if(0 == tag.compareTo(VIEW_TAG_BUDGETING)) {
-			return getPlanView();
+			view = getPlanView();
 		} else if(0 == tag.compareTo(VIEW_TAG_STATISTICS)) {
-			return getStatisticsView();
+			view = getStatisticsView();
+		} else {
+			return null;
 		}
-		return null;
+		
+		view.setTag(tag);
+		return view;
 	}
 
 	private View getOverviewView() {
@@ -173,7 +197,7 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 		RRStatisticsView statView = new RRStatisticsView(this);
 		statView.setUp(mDbAdapter);
 
-		statView.refreshData();
+		statView.refreshContent();
 
 		return statView;
 	}

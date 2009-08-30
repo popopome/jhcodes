@@ -24,6 +24,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.jhlee.vbudget.R;
+import com.jhlee.vbudget.RRBudgetContent;
 import com.jhlee.vbudget.VisualBudget;
 import com.jhlee.vbudget.VisualBudget.RRMoneyContentHost;
 import com.jhlee.vbudget.db.RRDbAdapter;
@@ -36,7 +37,7 @@ import com.jhlee.vbudget.tags.RRTagSelectDialog;
 import com.jhlee.vbudget.util.RRUtil;
 
 public class RRDailyExpenseCarouselView extends FrameLayout implements
-		OnCarouselActiveItemClickListener, OnCarouselActiveItemChanged {
+		OnCarouselActiveItemClickListener, OnCarouselActiveItemChanged, RRBudgetContent {
 	private static final String TAG = "rrdailyExpenseCarouselView";	
 	private static final String POSTFIX_REFLECTION_BMP = "@#$";
 
@@ -86,7 +87,7 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 
 		/* Collect receipt data from database */
 		mAdapter = dbAdapter;
-		refreshData();
+		refreshContent();
 		int numOfReceipts = mCursor.getCount();
 		if (numOfReceipts < 1) {
 			/* TODO: Show receipt data first */
@@ -96,7 +97,7 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 			 * No data is in there. Just finisth the activity.
 			 */
 			Toast.makeText(getContext(),
-					"No receipt data. Please take a receipt first.",
+					"No expense data. Please enter your expesnes first.",
 					Toast.LENGTH_LONG).show();
 			return false;
 		}
@@ -186,7 +187,7 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 								mAdapter.updateDate(mCursor, dlg
 										.getSelectedDateInMillis());
 								/* Refresh db cursor */
-								RRDailyExpenseCarouselView.this.refreshData();
+								RRDailyExpenseCarouselView.this.refreshContent();
 
 								/*
 								 * Let's keep current view position. To do that
@@ -253,7 +254,7 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 						mAdapter.updateTotalMoney(rid, inputDlg.getDollars(),
 								inputDlg.getCents());
 						/* Refresh db items */
-						RRDailyExpenseCarouselView.this.refreshData();
+						RRDailyExpenseCarouselView.this.refreshContent();
 						/* Invalidate screen */
 						carouselView.invalidate();
 					}
@@ -271,12 +272,18 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		mHost = host;
 	}
 
-	public void refreshData() {
+
+	/*
+	 * Refresh content
+	 */
+	@Override
+	public void refreshContent() {
 		if (mCursor != null) {
 			mCursor.close();
 			mCursor = null;
 		}
 		mCursor = mAdapter.queryAllReceipts();
+		
 	}
 
 	/**

@@ -11,9 +11,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -21,13 +19,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.jhlee.vbudget.R;
-import com.jhlee.vbudget.collect.RRCollectView;
+import com.jhlee.vbudget.RRBudgetContent;
 import com.jhlee.vbudget.collect.RRTakeReceiptActivity;
 import com.jhlee.vbudget.collect.RRTransactionEditDialog;
 import com.jhlee.vbudget.db.RRDbAdapter;
 import com.jhlee.vbudget.util.RRUtil;
 
-public class RRMoneyOverview extends FrameLayout {
+public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 
 	private static final String TAG = "RRMoneyOverview";
 
@@ -126,35 +124,8 @@ public class RRMoneyOverview extends FrameLayout {
 			}
 		});
 
-		/*
-		 * Set year month
-		 */
-		String yearMonthStr = RRUtil.getCurrentYearMonthString();
-		mYearMonthTextView.setText(yearMonthStr);
-
-		Cursor c = mDbAdapter.queryCurrentMonthBudget();
-		if (c != null) {
-			long balance = 0;
-			long total = 0;
-			if(c.getCount() >= 1) {
-				balance = c.getLong(RRDbAdapter.COL_BUDGET_BALANCE);
-				total = c.getLong(RRDbAdapter.COL_BUDGET_AMOUNT);	
-			}
-			c.close();
-			
-			mBudgetBalanceTextView.setText(RRUtil.formatMoney(balance / 100,
-					balance % 100, true));
-			mBudgetAmountTextView.setText(RRUtil.formatMoney(total / 100,
-					total % 100, true));
-			mBudgetAmountTextView.requestLayout();
-
-			mBudgetProgress.setMax((int) total);
-			mBudgetProgress.setProgress((int) balance);
-		}
-
-		mBudgetList.setAdapter(new RRSimpleBudgetAdapter());
-
-		requestLayout();
+		/* Fill data */
+		refreshContent();
 	}
 
 	private class RRSimpleBudgetAdapter extends BaseAdapter {
@@ -217,4 +188,41 @@ public class RRMoneyOverview extends FrameLayout {
 
 	}
 
+	/*
+	 * Refresh content
+	 */
+	@Override
+	public void refreshContent() {
+		/*
+		 * Set year month
+		 */
+		String yearMonthStr = RRUtil.getCurrentYearMonthString();
+		mYearMonthTextView.setText(yearMonthStr);
+
+		Cursor c = mDbAdapter.queryCurrentMonthBudget();
+		if (c != null) {
+			long balance = 0;
+			long total = 0;
+			if(c.getCount() >= 1) {
+				balance = c.getLong(RRDbAdapter.COL_BUDGET_BALANCE);
+				total = c.getLong(RRDbAdapter.COL_BUDGET_AMOUNT);	
+			}
+			c.close();
+			
+			mBudgetBalanceTextView.setText(RRUtil.formatMoney(balance / 100,
+					balance % 100, true));
+			mBudgetAmountTextView.setText(RRUtil.formatMoney(total / 100,
+					total % 100, true));
+			mBudgetAmountTextView.requestLayout();
+
+			mBudgetProgress.setMax((int) total);
+			mBudgetProgress.setProgress((int) balance);
+		}
+
+		mBudgetList.setAdapter(new RRSimpleBudgetAdapter());
+
+		requestLayout();
+		
+	}
+	
 }
