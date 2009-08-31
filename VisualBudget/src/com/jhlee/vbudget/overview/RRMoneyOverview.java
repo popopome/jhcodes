@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -37,6 +38,8 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 	private ListView mBudgetList;
 	private ImageButton mCameraButton;
 	private ImageButton mExpenseButton;
+	private Handler mHandler = new Handler();
+	private Runnable mDataRefreshTask = null;
 
 	public RRMoneyOverview(Context context) {
 		this(context, null);
@@ -75,7 +78,9 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 			}
 		});
 
-		/* Manual insert */
+		/*
+		 * Manual budget insert
+		 */
 		mExpenseButton.setOnClickListener(new OnClickListener() {
 
 			/* Transaction button is clicked */
@@ -89,6 +94,11 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 						.setOnDismissListener(new DialogInterface.OnDismissListener() {
 							@Override
 							public void onDismiss(DialogInterface dialog) {
+								/*
+								 * We always refresh budget amount at here.
+								 */
+								RRMoneyOverview.this.requestDataRefresh();
+
 								/* Dialog is closed */
 								if (dlg.isCanceled())
 									return;
@@ -123,6 +133,24 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 				dlg.show();
 			}
 		});
+	}
+
+	/*
+	 * Request data refresh
+	 */
+	private void requestDataRefresh() {
+		if (mDataRefreshTask == null) {
+			mDataRefreshTask = new Runnable() {
+				@Override
+				public void run() {
+					RRMoneyOverview.this.refreshContent();
+				}
+			};
+		}
+		if (mDataRefreshTask != null) {
+			mHandler.removeCallbacks(mDataRefreshTask);
+			mHandler.post(mDataRefreshTask);
+		}
 	}
 
 	private class RRSimpleBudgetAdapter extends BaseAdapter {
@@ -199,12 +227,12 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 		if (c != null) {
 			long balance = 0;
 			long total = 0;
-			if(c.getCount() >= 1) {
+			if (c.getCount() >= 1) {
 				balance = c.getLong(RRDbAdapter.COL_BUDGET_BALANCE);
-				total = c.getLong(RRDbAdapter.COL_BUDGET_AMOUNT);	
+				total = c.getLong(RRDbAdapter.COL_BUDGET_AMOUNT);
 			}
 			c.close();
-			
+
 			mBudgetBalanceTextView.setText(RRUtil.formatMoney(balance, true));
 			mBudgetAmountTextView.setText(RRUtil.formatMoney(total, true));
 			mBudgetAmountTextView.requestLayout();
@@ -216,7 +244,7 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 		mBudgetList.setAdapter(new RRSimpleBudgetAdapter());
 
 		requestLayout();
-		
+
 	}
-	
+
 }
