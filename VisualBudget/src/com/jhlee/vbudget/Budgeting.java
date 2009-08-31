@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.FrameLayout;
@@ -33,6 +35,11 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 	private RRDbAdapter mDbAdapter;
 
 	private TabHost mTabHost;
+
+	/*
+	 * Hold menu
+	 */
+	private Menu mMenu;
 
 	/*
 	 * Activity is created. Initialize stuffs
@@ -71,29 +78,21 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 			/* Tab is changed */
 			@Override
 			public void onTabChanged(String tabId) {
-				RRBudgetContent content;
+				RRBudgetContent content = (RRBudgetContent) mTabHost
+						.getCurrentView();
+				content.refreshContent();
 
-				/* Find view */
-				FrameLayout frame = tabHost.getTabContentView();
-				int cnt = frame.getChildCount();
-				int pos = cnt - 1;
-				View child = null;
-				for (; pos >= 0; --pos) {
-					child = frame.getChildAt(pos);
-					/*
-					 * View can have no tag.
-					 */
-					String viewTag = (String) child.getTag();
-					if (null == viewTag) {
-						continue;
+				/* Let's create menu. */
+				if (mMenu != null) {
+					int menuCnt = mMenu.size();
+					for (int menuPos = menuCnt - 1; menuPos >= 0; --menuPos) {
+						int id = mMenu.getItem(menuPos).getItemId();
+						mMenu.removeItem(id);
 					}
 
-					if (0 == viewTag.compareToIgnoreCase(tabId)) {
-						content = (RRBudgetContent) child;
-						content.refreshContent();
-						return;
-					}
+					content.createMenu(mMenu, Budgeting.this.getMenuInflater());
 				}
+				return;
 			}
 		});
 
@@ -134,6 +133,30 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 		return view;
 	}
 
+	private View findContentView(String tabId) {
+		/* Find view */
+		FrameLayout frame = mTabHost.getTabContentView();
+		int cnt = frame.getChildCount();
+		int pos = cnt - 1;
+		View child = null;
+		for (; pos >= 0; --pos) {
+			child = frame.getChildAt(pos);
+			/*
+			 * View can have no tag.
+			 */
+			String viewTag = (String) child.getTag();
+			if (null == viewTag) {
+				continue;
+			}
+
+			if (0 == viewTag.compareToIgnoreCase(tabId)) {
+				return child;
+			}
+		}
+
+		return null;
+	}
+
 	private View getOverviewView() {
 		RRMoneyOverview view = new RRMoneyOverview(this);
 		view.initialize(mDbAdapter);
@@ -168,12 +191,12 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 		RRDailyExpenseCarouselView carouselView = new RRDailyExpenseCarouselView(
 				this);
 		carouselView.initializeViews(mDbAdapter);
-//		if (false == carouselView.initializeViews(mDbAdapter)) {
-//			Log.e(TAG, "Unable to initialize carousel view");
-//			/* Let's return empty data */
-//			return RRUtil.createViewsFromLayout(this,
-//					R.layout.empty_data_guide, null);
-//		}
+		// if (false == carouselView.initializeViews(mDbAdapter)) {
+		// Log.e(TAG, "Unable to initialize carousel view");
+		// /* Let's return empty data */
+		// return RRUtil.createViewsFromLayout(this,
+		// R.layout.empty_data_guide, null);
+		// }
 
 		carouselView.setTag(VIEW_TAG_EXPENSES);
 		return carouselView;
@@ -219,4 +242,32 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 
 		return statView;
 	}
+
+	/*
+	 * Menu items
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		/* Keep menu */
+		mMenu = menu;
+
+		RRBudgetContent content = (RRBudgetContent) mTabHost.getCurrentView();
+		content.createMenu(menu, getMenuInflater());
+
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	/*
+	 * Option item is selected
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		RRBudgetContent content = (RRBudgetContent) mTabHost.getCurrentView();
+		content.onMenuItemSelected(item);
+		
+		return super.onOptionsItemSelected(item);
+	}
+	
+	
+
 }

@@ -3,6 +3,9 @@ package com.jhlee.vbudget.statistics;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.AttributeSet;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -37,6 +40,21 @@ public class RRStatisticsView extends FrameLayout implements RRBudgetContent {
 				ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.FILL_PARENT));
 	}
+
+	
+	
+	@Override
+	public void createMenu(Menu menu, MenuInflater inflater) {
+	}
+
+	/*
+	 * Menu item is selected
+	 */
+	@Override
+	public void onMenuItemSelected(MenuItem mi) {
+
+	}
+
 
 	/**
 	 * Create day-by-day expense graph

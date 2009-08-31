@@ -67,4 +67,5 @@ public class RRUtil {
 		li = (LayoutInflater) ctx.getSystemService(infService);
 		return li.inflate(layoutId, parent, true);
 	}
+	
 }

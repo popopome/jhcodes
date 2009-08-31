@@ -10,6 +10,9 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -133,6 +136,18 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 				dlg.show();
 			}
 		});
+	}
+
+	@Override
+	public void createMenu(Menu menu, MenuInflater inflater) {
+		menu.add(0, 0, 0, "About");
+	}
+	/*
+	 * Menu item is selected
+	 */
+	@Override
+	public void onMenuItemSelected(MenuItem mi) {
+
 	}
 
 	/*

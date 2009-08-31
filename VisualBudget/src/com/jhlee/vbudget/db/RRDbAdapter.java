@@ -17,7 +17,6 @@ import com.jhlee.vbudget.util.RRUtil;
 
 public class RRDbAdapter {
 
-
 	private static final String LOG = "RRDbAdapter";
 
 	private static final int DB_VERSION = 16;
@@ -120,6 +119,7 @@ public class RRDbAdapter {
 	private static final long TAG_STRING_FORMAT_MULTI_LINE = 1;
 	private static final long TAG_STRING_FORMAT_COMMA_SEP = 2;
 	private static final long NULL_BALANCE = 0x7FFFFFFF;
+	public static final long NULL_BUDGET_ID = -1;
 
 	private DbHelper mDbHelper;
 	private SQLiteDatabase mDb;
@@ -129,7 +129,6 @@ public class RRDbAdapter {
 	public RRDbAdapter(Context ctx) {
 		mDbHelper = new DbHelper(ctx);
 		mDb = mDbHelper.getWritableDatabase();
-
 	}
 
 	/*
@@ -166,6 +165,37 @@ public class RRDbAdapter {
 		return mDb.insert(TABLE_RECEIPT, null, vals);
 	}
 
+	/*
+	 * Delete expense
+	 */
+	public boolean deleteExpense(long id) {
+		/*
+		 * Budget back
+		 */
+		Cursor c = queryReceipt(id);
+		c.moveToFirst();
+		if (c.getCount() < 1)
+			return false;
+
+		long total = c.getLong(c.getColumnIndex(KEY_RECEIPT_TOTAL));
+		long budgetIdColIndex = c.getColumnIndex(KEY_RECEIPT_BUDGET_ID);
+		if (c.isNull((int) budgetIdColIndex) == false) {
+			long budgetId = c.getLong((int) budgetIdColIndex);
+			if (budgetId != NULL_BUDGET_ID) {
+				returnTransactionToBudget(id, total, budgetId);
+			}
+		}
+
+		/*
+		 * Delete data from table
+		 */
+		int cnt = mDb.delete(TABLE_RECEIPT, "_id=" + id, null);
+		if (cnt != 1)
+			return false;
+
+		return true;
+	}
+
 	public long newTransaction() {
 		return insertReceipt("NT", "NTS");
 	}
@@ -187,12 +217,13 @@ public class RRDbAdapter {
 	/**
 	 * Query receipt information
 	 * 
-	 * @param rid
+	 * @param transId
 	 *            Receipt id
 	 * @return
 	 */
-	public Cursor queryReceipt(int rid) {
-		Cursor c = mDb.query(TABLE_RECEIPT, null, "_id=" + rid, null, null,
+	public Cursor queryReceipt(long transId) {
+		Cursor c = mDb.query("receipt LEFT OUTER JOIN budget ON receipt.budget_id=budget._id",
+				new String[] { "*", "budget.budget_name as budget_name" }, "receipt._id=" + transId, null, null,
 				null, null);
 		if (c != null) {
 			c.moveToFirst();
@@ -210,8 +241,29 @@ public class RRDbAdapter {
 	public Cursor queryAllReceipts() {
 		Cursor c = mDb.query(TABLE_RECEIPT, null, null, null, null, null,
 				KEY_RECEIPT_TAKEN_DATE);
-		if (c != null)
+		if (c != null) {
+			c.moveToFirst();
 			mOwnerActivity.startManagingCursor(c);
+		}
+		return c;
+	}
+
+	/**
+	 * Query all receipts
+	 * 
+	 * @return Cursor
+	 */
+	public Cursor queryAllReceiptsWithBudgetName() {
+		// "select receipt.*, budget._id, budget.budget_name from receipt LEFT OUTER JOIN budget ON receipt.budget_id=budget._id;"
+		Cursor c = mDb
+				.query(
+						"receipt LEFT OUTER JOIN budget ON receipt.budget_id=budget._id",
+						new String[] { "*", "budget.budget_name as budget_name" },
+						null, null, null, null, KEY_RECEIPT_TAKEN_DATE);
+		if (c != null) {
+			c.moveToFirst();
+			mOwnerActivity.startManagingCursor(c);
+		}
 		return c;
 	}
 
@@ -518,29 +570,30 @@ public class RRDbAdapter {
 				"year, month");
 		return c;
 	}
-	
+
 	public Cursor queryCurrentMonthBudget() {
 		Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
 		int year = cal.get(Calendar.YEAR);
-		int month = cal.get(Calendar.MONTH)+1;
-		
+		int month = cal.get(Calendar.MONTH) + 1;
+
 		Cursor c = mDb.query(TABLE_BUDGET, new String[] { "_id", "year",
 				"month", "count(_id)", "sum(budget_amount)",
 				"sum(budget_balance)", "max(budget_amount)",
-				"max(budget_balance)" }, "year=" + year + " and month=" + month, null, "year, month", null,
-				"year, month");
+				"max(budget_balance)" },
+				"year=" + year + " and month=" + month, null, "year, month",
+				null, "year, month");
 		c.moveToFirst();
 		mOwnerActivity.startManagingCursor(c);
 		return c;
 	}
-	
+
 	public Cursor queryCurrentMonthBudgetItems() {
 		Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
 		int year = cal.get(Calendar.YEAR);
-		int month = cal.get(Calendar.MONTH)+1;
-		
-		Cursor c = mDb.query(TABLE_BUDGET, null, "year=" + year + " and month=" + month, null, null, null,
-				"budget_name");
+		int month = cal.get(Calendar.MONTH) + 1;
+
+		Cursor c = mDb.query(TABLE_BUDGET, null, "year=" + year + " and month="
+				+ month, null, null, null, "budget_name");
 		c.moveToFirst();
 		mOwnerActivity.startManagingCursor(c);
 		return c;
@@ -643,25 +696,43 @@ public class RRDbAdapter {
 	public boolean makeTransactionFromBudget(long transId, long money,
 			long budgetId) {
 		long balance = queryBudgetBalance(budgetId);
-		if(NULL_BALANCE == balance)
+		if (NULL_BALANCE == balance)
 			return false;
-		
+
 		balance -= money;
-		if(false == updateBudgetBalance(budgetId, balance))
+		if (false == updateBudgetBalance(budgetId, balance))
 			return false;
-		
+
 		return updateTransactionBudget(transId, budgetId);
 	}
-	
+
+	/*
+	 * Return previous transaction to budget
+	 */
+	public boolean returnTransactionToBudget(long transId, long money,
+			long budgetId) {
+		long balance = queryBudgetBalance(budgetId);
+		if (NULL_BALANCE == balance)
+			return false;
+
+		balance += money;
+		if (false == updateBudgetBalance(budgetId, balance))
+			return false;
+
+		return updateTransactionBudget(transId, NULL_BUDGET_ID);
+	}
+
 	/*
 	 * Udpate transaction budget
 	 */
 	private boolean updateTransactionBudget(long transId, long budgetId) {
 		ContentValues val = new ContentValues();
 		val.put(KEY_RECEIPT_BUDGET_ID, budgetId);
-		int rowCnt = mDb.update(TABLE_RECEIPT, val, "_id="+transId, null);
-		if(rowCnt != -1){
-			Log.e(TAG, "Unable to update transaction budget:transId=" + transId);
+		int rowCnt = mDb.update(TABLE_RECEIPT, val, "_id=" + transId, null);
+		if (rowCnt != -1) {
+			Log
+					.e(TAG, "Unable to update transaction budget:transId="
+							+ transId);
 			return false;
 		}
 		return true;
@@ -674,8 +745,9 @@ public class RRDbAdapter {
 		ContentValues val = new ContentValues();
 		val.put(KEY_BUDGET_BALANCE, balance);
 		int rowCnt = mDb.update(TABLE_BUDGET, val, "_id=" + budgetId, null);
-		if(rowCnt != 1) {
-			Log.e(TAG, "Unable to update budget blance:budgetId=" + budgetId + ", budgetBalance=" + balance);
+		if (rowCnt != 1) {
+			Log.e(TAG, "Unable to update budget blance:budgetId=" + budgetId
+					+ ", budgetBalance=" + balance);
 			return false;
 		}
 		return true;
@@ -687,12 +759,49 @@ public class RRDbAdapter {
 	private long queryBudgetBalance(long budgetId) {
 		Cursor c = mDb.query(TABLE_BUDGET, new String[] { "budget_balance" },
 				"_id=" + budgetId, null, null, null, null);
-		if(c.getCount() == 0)
+		if (c.getCount() == 0)
 			return NULL_BALANCE;
 		c.moveToFirst();
 		long balance = c.getLong(0);
 		c.close();
 		return balance;
+	}
+
+	public boolean changeBudget(long transId, int year, int month,
+			String newBudgetName) {
+		long curBudgetId = findBudgetItem(year, month, newBudgetName);
+		if (-1 == curBudgetId) {
+			Log.e(TAG, "Unable to find budget");
+			return false;
+		}
+
+		Cursor c = queryReceipt(transId);
+		if (c == null || c.getCount() != 1) {
+			Log.e(TAG, "No expense data is found:transID=" + transId);
+			return false;
+		}
+
+		int expenseAmountCol = c.getColumnIndex(RRDbAdapter.KEY_RECEIPT_TOTAL);
+		int budgetIdCol = c.getColumnIndex(RRDbAdapter.KEY_RECEIPT_BUDGET_ID);
+		if (false == c.isNull(budgetIdCol)) {
+			/*
+			 * Previous linked budget item is found If previous budget id is -1,
+			 * then the value which the program set to mark deleted budget id.
+			 * 
+			 * So -1 is considered as NULL case.
+			 */
+			long budgetId = c.getLong(budgetIdCol);
+			if (budgetId != RRDbAdapter.NULL_BUDGET_ID) {
+				returnTransactionToBudget(transId, c.getLong(expenseAmountCol),
+						budgetId);
+			}
+		}
+
+		/* Make transaction */
+		long expenseAmount = c.getLong(expenseAmountCol);
+		makeTransactionFromBudget(transId, expenseAmount, curBudgetId);
+
+		return true;
 	}
 
 	/*

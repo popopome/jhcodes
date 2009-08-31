@@ -8,6 +8,9 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -181,6 +184,18 @@ public class RRBudgetMainView extends LinearLayout implements RRBudgetContent {
 		return pos;
 	}
 
+	@Override
+	public void createMenu(Menu menu, MenuInflater inflater) {
+	}
+
+	/*
+	 * Menu item is selected
+	 */
+	@Override
+	public void onMenuItemSelected(MenuItem mi) {
+
+	}
+	
 	private int getCurrentYearMonthPosition() {
 		Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
 		return yearMonthToPosition(cal.get(Calendar.YEAR), cal

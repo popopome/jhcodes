@@ -5,11 +5,10 @@
 
 	<TextView android:id="@+id/expense_empty"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
-		android:text="Wow! No expenses" 
-		android:textSize="30.0sp"
-		android:layout_centerInParent="true"
-		android:layout_centerHorizontal="true"
-		/>
+		android:text="Wow! No expenses" android:textSize="30.0sp"
+		android:layout_centerInParent="true" android:layout_centerHorizontal="true" />
+	
+	
 	<RelativeLayout android:id="@+id/expense_wrapper"
 		android:layout_width="fill_parent" android:layout_height="fill_parent">
 		<com.jhlee.vbudget.expense.RRCarouselFlowView
@@ -25,7 +24,7 @@
 			android:background="@drawable/day_view_button_state"
 			android:layout_alignParentRight="true"></Button>
 		-->
-		<Button android:layout_width="wrap_content" android:id="@+id/button_numpad"
+		<!--<Button android:layout_width="wrap_content" android:id="@+id/button_numpad"
 			android:layout_height="wrap_content" android:background="@drawable/numpad_button_state"
 			android:layout_alignParentRight="true"
 			android:layout_alignParentBottom="true"></Button>
@@ -37,14 +36,30 @@
 		<Button android:id="@+id/button_tag" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:background="@drawable/tag_button_state"
 			android:layout_toLeftOf="@id/button_date_pick"
-
 			android:layout_alignParentBottom="true"></Button>
+		<ImageButton android:id="@+id/button_budget" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" 
+			android:layout_toLeftOf="@id/button_tag"
+			android:layout_alignParentBottom="true"
+			android:src="@drawable/budget_icon"
+			style="@style/Widget.Button.BigButton"
+			></ImageButton>
 
-		<!--
+
+
+		--><!--
 			<com.jhlee.vbudget.expense.RRTagBox android:id="@+id/tag_box"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content" android:visibility="invisible"
 			android:layout_alignParentBottom="true" />
 		-->
 	</RelativeLayout>
+	
+	<Button android:id="@+id/button_delete" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:focusable="false"
+		android:background="@drawable/item_delete_bg_state"
+		android:paddingLeft="5px"
+		android:visibility="gone"
+		></Button>
+		
 </RelativeLayout>

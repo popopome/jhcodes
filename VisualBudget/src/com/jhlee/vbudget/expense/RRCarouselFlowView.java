@@ -27,7 +27,7 @@ public class RRCarouselFlowView extends View {
 	}
 
 	public abstract interface OnCarouselActiveItemClickListener {
-		public abstract void onClicked(RRCarouselFlowView view,
+		public abstract void onCarouselItemClicked(RRCarouselFlowView view,
 				RRCarouselItem item);
 	}
 
@@ -35,6 +35,9 @@ public class RRCarouselFlowView extends View {
 		public abstract void onActiveItemChanged(RRCarouselFlowView view,
 				RRCarouselItem item);
 	}
+	public abstract interface OnCarouselScrollEventListener {
+		public abstract void onScrollStarted();
+	};
 
 	public class RRCarouselItem {
 		public int seq;
@@ -97,6 +100,7 @@ public class RRCarouselFlowView extends View {
 	private OnCarouselActiveItemClickListener mOnActiveItemClickListener = null;
 	private OnCarouselItemCustomDrawListener mOnCustomDrawListener = null;
 	private OnCarouselActiveItemChanged mOnActiveItemChangeListener = null;
+	private OnCarouselScrollEventListener mOnScrollEventListener = null;
 
 	/** Animation handler */
 	private Handler mAnimationHandler = new Handler();
@@ -189,8 +193,22 @@ public class RRCarouselFlowView extends View {
 	public void initialize(int itemCount, int itemWidth, int itemHeight,
 			int focalLength, int hyperbola_A, int hyperbola_B) {
 		mItemCnt = itemCount;
+		
+		/*
+		 * Let's adjust item width/height with view width height
+		 */
+		int w = getWidth();
+		int h = getHeight();
 		mItemWidth = itemWidth;
 		mItemHeight = itemHeight;
+		if (w < h) {
+			mItemHeight = mItemWidth = w * 2 / 3;
+		} else {
+			mItemHeight = mItemWidth = h * 2 / 3;
+		}
+		mItemWidth = Math.max(mItemWidth, itemWidth);
+		mItemHeight = mItemWidth;
+		
 		mFocalLength = focalLength;
 		mHyperbolaA = hyperbola_A;
 		mHyperbolaB = hyperbola_B;
@@ -223,6 +241,11 @@ public class RRCarouselFlowView extends View {
 	public void setOnActiveItemClickListener(
 			OnCarouselActiveItemClickListener activeItemClickListener) {
 		mOnActiveItemClickListener = activeItemClickListener;
+	}
+	
+	public void setOnCarouselScrollEventListener(
+			OnCarouselScrollEventListener listener) {
+		mOnScrollEventListener = listener;
 	}
 
 	public void setOnActiveItemChangeListener(
@@ -440,6 +463,7 @@ public class RRCarouselFlowView extends View {
 				return false;
 			}
 			
+			
 			mActiveSeqAtMouseDown = item.seq;
 			mLastMouseX = curX;
 			mMouseDownX = curX;
@@ -447,6 +471,13 @@ public class RRCarouselFlowView extends View {
 			
 			/* Keep mouse down times */
 			mMouseDownMillis = Calendar.getInstance().getTimeInMillis();
+			
+			/*
+			 * Notify scroll event
+			 */
+			if(mOnScrollEventListener != null)
+				mOnScrollEventListener.onScrollStarted();
+			
 			break;
 		case MotionEvent.ACTION_MOVE:
 			int offset = mLastMouseX - curX;
@@ -470,7 +501,7 @@ public class RRCarouselFlowView extends View {
 					if (item == getActiveItem()) {
 						/** Active item is clicked */
 						if (null != mOnActiveItemClickListener) {
-							mOnActiveItemClickListener.onClicked(this, item);
+							mOnActiveItemClickListener.onCarouselItemClicked(this, item);
 							return true;
 						}
 					}
