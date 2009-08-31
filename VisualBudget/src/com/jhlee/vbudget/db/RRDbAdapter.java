@@ -274,14 +274,42 @@ public class RRDbAdapter {
 	 * @param dollars
 	 * @param cents
 	 */
-	public void updateTotalMoney(long rid, int dollars, int cents) {
-		int encoded = dollars * 100 + cents;
+	public void updateExpenseAmount(long rid, int dollars, int cents) {
+		/* Let's update budget amount */
+		Cursor c = queryReceipt(rid);
+		if(c.getCount() != 1) {
+			Log.e(TAG, "Not found expense data:id="+rid);
+			return;
+		}
+		
+		long newTotal = dollars * 100 + cents;
+		
+		/*
+		 * If expense alreadyf have budget id,
+		 * then we make changes for budget amount.
+		 */
+		long oldTotal = c.getLong(c.getColumnIndex(KEY_RECEIPT_TOTAL));
+		int budgetIdColIndex = c.getColumnIndex(KEY_RECEIPT_BUDGET_ID);
+		if(false == c.isNull(budgetIdColIndex)) {
+			if(budgetIdColIndex != NULL_BUDGET_ID) {
+				/* There is budget id */
+				int budgetId = c.getInt(budgetIdColIndex);
+				
+				/* Update budget balance */
+				long delta = newTotal - oldTotal;
+				long budgetBalance = queryBudgetBalance(budgetId);
+				budgetBalance -= delta;
+				updateBudgetBalance(budgetId, budgetBalance);
+			}
+		}
+		
 		ContentValues vals = new ContentValues();
-		vals.put(KEY_RECEIPT_TOTAL, encoded);
+		vals.put(KEY_RECEIPT_TOTAL, newTotal);
 		int numRows = mDb.update(TABLE_RECEIPT, vals, "_id="
 				+ Long.toString(rid), null);
 		if (numRows != 1) {
 			Log.e(TAG, "Unable to update row:rid=" + Long.toString(rid));
+			return;
 		}
 	}
 
@@ -616,11 +644,28 @@ public class RRDbAdapter {
 		return true;
 	}
 
-	public boolean removeBudgetItem(long id) {
+	/*
+	 * Delete budget item
+	 */
+	public boolean deleteBudgetItem(long id) {
 		int rowCnt = mDb.delete(TABLE_BUDGET, "_id=" + id, null);
 		if (rowCnt != 1) {
 			Log.e(LOG, "Unable to delete budget");
 			return false;
+		}
+		
+		/* Let's update expenses which uses this budget item */
+		ContentValues val = new ContentValues();
+		Cursor c = mDb.query(TABLE_RECEIPT, new String[]{"_id"}, "budget_id="+id, null, null, null, null);
+		int cnt = c.getCount();
+		if(cnt < 1)
+			return true;
+		
+		c.moveToFirst();
+		while(c.isAfterLast() == false) {
+			int transId = c.getInt(0);
+			updateTransactionBudget(transId, NULL_BUDGET_ID);
+			c.moveToNext();
 		}
 
 		return true;

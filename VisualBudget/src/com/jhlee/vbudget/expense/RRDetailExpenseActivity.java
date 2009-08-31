@@ -285,7 +285,7 @@ public class RRDetailExpenseActivity extends Activity {
 
 				/* Insert new total money to db */
 				int rid = mCursor.getInt(0);
-				mDbAdapter.updateTotalMoney(rid, inputDlg.getDollars(),
+				mDbAdapter.updateExpenseAmount(rid, inputDlg.getDollars(),
 						inputDlg.getCents());
 
 				refreshDbCursor();

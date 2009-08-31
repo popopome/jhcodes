@@ -663,7 +663,7 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 				/* Insert new total money to db */
 				mCursor.moveToPosition(item.seq);
 				int rid = mCursor.getInt(0);
-				mAdapter.updateTotalMoney(rid, inputDlg.getDollars(),
+				mAdapter.updateExpenseAmount(rid, inputDlg.getDollars(),
 						inputDlg.getCents());
 				/* Refresh db items */
 				RRDailyExpenseCarouselView.this.refreshContent();

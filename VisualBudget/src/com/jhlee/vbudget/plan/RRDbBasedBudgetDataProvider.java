@@ -63,7 +63,7 @@ public class RRDbBasedBudgetDataProvider implements RRBudgetDataProvider{
 			Log.e(TAG, "Unable to find budget:budgetName=" + budgetName);
 			return false;
 		}
-		boolean bresult = mDbAdapter.removeBudgetItem(id);
+		boolean bresult = mDbAdapter.deleteBudgetItem(id);
 		if(bresult)
 			requery();
 		return bresult;

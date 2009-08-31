@@ -91,7 +91,7 @@ public class RRCollectView extends ScrollView {
 							mDbAdapter.addTagToReceipt(transId, it.next());
 						}
 						long money = dlg.getExpenseAmount();
-						mDbAdapter.updateTotalMoney(transId, (int)money/100, (int)money%100);
+						mDbAdapter.updateExpenseAmount(transId, (int)money/100, (int)money%100);
 						
 						/* Apply budget field */
 						long budgetId = dlg.getSelectedBudgetId();
@@ -176,7 +176,7 @@ public class RRCollectView extends ScrollView {
 				
 				int dollars = dlg.getDollars();
 				int cents = dlg.getCents();
-				mDbAdapter.updateTotalMoney(transId, dollars, cents);
+				mDbAdapter.updateExpenseAmount(transId, dollars, cents);
 			}
 		});
 		dlg.show();

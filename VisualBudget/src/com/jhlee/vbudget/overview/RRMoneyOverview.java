@@ -120,7 +120,7 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 											.next());
 								}
 								long money = dlg.getExpenseAmount();
-								mDbAdapter.updateTotalMoney(transId,
+								mDbAdapter.updateExpenseAmount(transId,
 										(int) money / 100, (int) money % 100);
 
 								/* Apply budget field */
