@@ -2,6 +2,7 @@ package com.jhlee.vbudget.overview;
 
 import java.util.Iterator;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -138,7 +139,6 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 		});
 	}
 
-	
 	@Override
 	public void onViewResumed() {
 	}
@@ -147,12 +147,26 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 	public void createMenu(Menu menu, MenuInflater inflater) {
 		menu.add(0, 0, 0, "About");
 	}
+
 	/*
 	 * Menu item is selected
 	 */
 	@Override
 	public void onMenuItemSelected(MenuItem mi) {
+		new AlertDialog.Builder(this.getContext())
+				.setTitle("Budgeting...")
+				.setMessage(
+						"Money is one of critical part of my life and also your life. Why don't you control your money flow? Here is great way to manage your precious money - Budgeting. Mobile camera is perfect way to capture your expenses at any time. Camera and budgeting is best discipline for being financial freebie.")
+				.setPositiveButton("OK",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
 
+								/* User clicked OK so do some stuff */
+							}
+						})
+
+				.create().show();
 	}
 
 	/*
