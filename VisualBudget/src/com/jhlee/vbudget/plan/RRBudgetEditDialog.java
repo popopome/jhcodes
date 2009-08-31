@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -27,11 +28,12 @@ public class RRBudgetEditDialog extends Dialog {
 	private static final int DEFAULT_BUDGET_AMOUNT = 100;
 	private RRBudgetDataProvider mProvider;
 	private Spinner mBudgetSpinner;
-	private SeekBar mSeekBar;
 	private Button mBudgetAmountButton;
 	private Button mOkButton;
 	private Button mCancelButton;
 	private Button mNewNameBtn;
+	private TextView mBudgetAmountView;
+	
 	private boolean mIsCanceled = true;
 	private boolean mIsEditMode = false;
 	private ArrayAdapter<String> mBudgetNameAdapter;
@@ -40,7 +42,7 @@ public class RRBudgetEditDialog extends Dialog {
 		super(context);
 		setContentView(R.layout.plan_budget_edit_dialog);
 
-		this.setTitle("New Budget");
+		this.setTitle("NEW BUDGET");
 		mBudgetSpinner = (Spinner) findViewById(R.id.spinner_budget_name);
 
 		mOkButton = (Button) findViewById(R.id.button_ok);
@@ -61,40 +63,9 @@ public class RRBudgetEditDialog extends Dialog {
 			}
 		});
 
+		mBudgetAmountView = (TextView) findViewById(R.id.budget_amount);
 		mBudgetAmountButton = (Button) findViewById(R.id.button_budget_amount);
-		mBudgetAmountButton.setText(RRUtil.formatMoney(
-				DEFAULT_BUDGET_MAX_AMOUNT, 0, true));
-
-		/* Initialize seek bar */
-		mSeekBar = (SeekBar) findViewById(R.id.seekbar_amount);
-		mSeekBar.setMax(DEFAULT_BUDGET_MAX_AMOUNT);
-		mSeekBar.setProgress(DEFAULT_BUDGET_AMOUNT);
-		mSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int val,
-					boolean fromUser) {
-				if (false == fromUser)
-					return;
-
-				val = (val + 5) / 10 * 10;
-				mSeekBar.setProgress(val);
-
-				/* Update budget amount value */
-				String moneyStr = RRUtil.formatMoney(val, 0, true);
-				mBudgetAmountButton.setText(moneyStr);
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-			}
-
-		});
-
+		
 		/* New name button is clicked */
 		mNewNameBtn = (Button) findViewById(R.id.button_new_budget_name);
 		mNewNameBtn.setOnClickListener(new View.OnClickListener() {
@@ -174,16 +145,8 @@ public class RRBudgetEditDialog extends Dialog {
 
 								String moneyStr = RRUtil.formatMoney(dollars,
 										cents, true);
-								mBudgetAmountButton.setText(moneyStr);
-
-								/* Set progress bar */
-								int maxDollars = mSeekBar.getMax();
-								if (dollars > maxDollars) {
-									int newMax = dollars + dollars / 3;
-									mSeekBar.setMax(newMax);
-								}
-
-								mSeekBar.setProgress(dollars);
+//								mBudgetAmountButton.setText(moneyStr);
+								mBudgetAmountView.setText(moneyStr);
 							}
 						});
 				dlg.show();
@@ -213,7 +176,7 @@ public class RRBudgetEditDialog extends Dialog {
 	 * Budget editing. Only amount can be changed.
 	 */
 	public void editBudget(String budgetName, long budgetAmount) {
-		this.setTitle("Edit budget");
+		this.setTitle("EDIT BUDGET");
 		final int pos = findBudgetName(budgetName);
 		if (pos == -1) {
 			/* Add budget name */
@@ -223,7 +186,7 @@ public class RRBudgetEditDialog extends Dialog {
 		}
 		mIsEditMode = true;
 		mNewNameBtn.setVisibility(View.GONE);
-		mBudgetAmountButton.setText(RRUtil.formatMoney(budgetAmount, true));
+		mBudgetAmountView.setText(RRUtil.formatMoney(budgetAmount, true));
 
 		mBudgetSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 
@@ -271,10 +234,19 @@ public class RRBudgetEditDialog extends Dialog {
 	}
 
 	public long getBudgetAmount() {
-		String moneyStr = (String) mBudgetAmountButton.getText();
+		String moneyStr = (String) mBudgetAmountView.getText();
 		if (null == moneyStr)
 			return 0;
-		double money = new Double(moneyStr.substring(1));
+		if(0 == moneyStr.length())
+			return 0;
+		
+		double money = 0;
+		try {
+			money = new Double(moneyStr.substring(1));
+		} catch(Exception e) {
+			return 0;
+		}
+		
 		return (long) (money * 100);
 	}
 

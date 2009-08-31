@@ -46,7 +46,7 @@ public class RRBudgetInputDialog extends Dialog {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.setContentView(R.layout.rr_budget_dialog);
+		this.setContentView(R.layout.budget_input_dialog);
 
 		mBudgetNameEdit = (EditText) findViewById(R.id.budget_name);
 		mBudgetAmountView = (TextView) findViewById(R.id.budget_total);

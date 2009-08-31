@@ -33,6 +33,7 @@ public class RRBudgetMainView extends LinearLayout implements RRBudgetContent {
 		public int getBudgetMonthCount();
 
 		public long getBudgetAmount(int year, int month);
+		public long getBudgetBalance(int year, int month);
 
 		public boolean getBudgetItem(int year, int month, int position,
 				RRBudgetItemData budgetData);

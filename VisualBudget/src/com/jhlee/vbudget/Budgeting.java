@@ -1,7 +1,9 @@
 package com.jhlee.vbudget;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -61,16 +63,17 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 		final TabHost tabHost = mTabHost;
 		tabHost.setup();
 
+		Resources res = getResources();
+		
 		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_OVERVIEW)
-		// .setIndicator("Overview",
-				// getResources().getDrawable(R.drawable.star_big_on))
-				.setIndicator("Overview").setContent(this));
+				.setIndicator("Overview", res.getDrawable(R.drawable.icon_overview)).setContent(this));
+		
 		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_EXPENSES).setIndicator(
-				"Expenses").setContent(this));
+				"Expenses", res.getDrawable(R.drawable.icon_expense)).setContent(this));
 		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_BUDGETING).setIndicator(
-				"Budgeting").setContent(this));
+				"Budgeting", res.getDrawable(R.drawable.icon_budgeting)).setContent(this));
 		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_STATISTICS).setIndicator(
-				"Statistics").setContent(this));
+				"Statistics", res.getDrawable(R.drawable.icon_statistics)).setContent(this));
 
 		/* Add tab change event handler */
 		tabHost.setOnTabChangedListener(new OnTabChangeListener() {

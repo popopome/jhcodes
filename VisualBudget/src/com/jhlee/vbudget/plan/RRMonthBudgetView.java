@@ -13,6 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jhlee.vbudget.R;
 import com.jhlee.vbudget.plan.RRBudgetItemView.OnDeleteButtonClickListener;
@@ -72,6 +73,10 @@ public class RRMonthBudgetView extends LinearLayout {
 
 											long budgetAmount = dlg
 													.getBudgetAmount();
+											if(budgetAmount == 0) {
+												Toast.makeText(RRMonthBudgetView.this.getContext(), "Invalid budget amount", Toast.LENGTH_SHORT).show();
+												return;
+											}
 											String budgetName = dlg
 													.getBudgetName();
 											RRMonthBudgetView.this
@@ -109,6 +114,10 @@ public class RRMonthBudgetView extends LinearLayout {
 											return;
 										long budgetAmount = dlg
 												.getBudgetAmount();
+										if(budgetAmount == 0) {
+											Toast.makeText(RRMonthBudgetView.this.getContext(), "Invalid budget amount", Toast.LENGTH_SHORT).show();
+											return;
+										}
 										String budgetName = dlg.getBudgetName();
 										RRMonthBudgetView.this.updateBudget(
 												budgetName, budgetAmount);
@@ -264,8 +273,10 @@ public class RRMonthBudgetView extends LinearLayout {
 				}
 				if (1 == position) {
 					long totalMoney = mProvider.getBudgetAmount(mYear, mMonth);
+					long balance = mProvider.getBudgetBalance(mYear, mMonth);
 					String moneyStr = RRUtil.formatMoney(totalMoney, true);
-					textView.setText(moneyStr);
+					String balanceStr = RRUtil.formatMoney(balance, true);
+					textView.setText(balanceStr + " of " + moneyStr);
 					return textView;
 				}
 				if (2 == position) {

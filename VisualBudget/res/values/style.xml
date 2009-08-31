@@ -45,6 +45,10 @@
 	<style name="Widget.TextView.ContentText" parent="android:Widget.TextView">
 		<item name="android:textSize">20.0sp</item>
 	</style>
+	<style name="Widget.TextView.BudgetInputContentText" parent="android:Widget.TextView">
+		<item name="android:textColor">#ff000000</item>
+		<item name="android:textSize">23.0sp</item>
+	</style>
 
 	<style name="Widget.TabWidget.Budgeting" parent="android:Widget.TabWidget">
 		<item name="android:textAppearance">@style/TextAppearance.Widget.TabWidget.Budgeting

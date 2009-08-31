@@ -105,6 +105,14 @@ public class RRDbBasedBudgetDataProvider implements RRBudgetDataProvider{
 		
 		return c.getLong(RRDbAdapter.COL_BUDGET_MONTH_AMOUNT_SUM);
 	}
+	
+	public long getBudgetBalance(int year, int month) {
+		Cursor c = mMonthCursor;
+		if(false ==moveCursorToYearMonth(c, year, month))
+			return 0;
+		
+		return c.getLong(RRDbAdapter.COL_BUDGET_MONTH_BALANCE_SUM);
+	}
 
 	@Override
 	public int getBudgetMonthCount() {

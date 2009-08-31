@@ -24,6 +24,6 @@
         android:autoText="false"
         android:capitalize="none"
         android:gravity="fill_horizontal"
-        android:hint="Enter new tag name"
+        android:hint="Enter new budget name"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 </LinearLayout>

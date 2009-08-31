@@ -527,7 +527,7 @@ public class RRDbAdapter {
 	public long getMaxExpenseAmongEachDays() {
 		Cursor cursor = mDb
 				.query(
-						"(select max(total) as accum from receipt group by taken_date_as_string)",
+						"(select sum(total) as accum from receipt group by taken_date_as_string)",
 						new String[] { "max(accum)" }, null, null, null, null,
 						null, null);
 		if (null == cursor)
@@ -688,9 +688,23 @@ public class RRDbAdapter {
 	 */
 	public boolean updateBudgetItem(int year, int month, String budgetName,
 			long budgetAmount) {
+		
+		int budgetId = (int) findBudgetItem(year, month, budgetName);
+		if(-1 == budgetId)
+			return false;
+		
+		Cursor c = queryBudgetItem(budgetId);
+		if(c.getCount() != 1)
+			return false;
+		
+		long oldAmount = c.getLong(COL_BUDGET_AMOUNT);
+		long oldBalance = c.getLong(COL_BUDGET_BALANCE);
+		long expenses = oldAmount - oldBalance;
+		
 		ContentValues vals = new ContentValues();
 		vals.put("budget_name", budgetName);
 		vals.put("budget_amount", budgetAmount);
+		vals.put("budget_balance", budgetAmount - expenses);
 
 		String whereStr = makeWhereForBudgetFinding(year, month, budgetName);
 
@@ -814,14 +828,20 @@ public class RRDbAdapter {
 	 * Get budget balance
 	 */
 	private long queryBudgetBalance(long budgetId) {
-		Cursor c = mDb.query(TABLE_BUDGET, new String[] { "budget_balance" },
-				"_id=" + budgetId, null, null, null, null);
+		Cursor c = queryBudgetItem(budgetId);
 		if (c.getCount() == 0)
 			return NULL_BALANCE;
-		c.moveToFirst();
-		long balance = c.getLong(0);
+		
+		long balance = c.getLong(COL_BUDGET_BALANCE);
 		c.close();
 		return balance;
+	}
+
+	private Cursor queryBudgetItem(long budgetId) {
+		Cursor c = mDb.query(TABLE_BUDGET, null,
+				"_id=" + budgetId, null, null, null, null);
+		c.moveToFirst();	
+		return c;
 	}
 
 	public boolean changeBudget(long transId, int year, int month,
