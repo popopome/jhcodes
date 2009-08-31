@@ -23,7 +23,7 @@ public class RRTagTextView extends View {
 	private static final int PADDING_TEXT_VERT = 10;
 	private static final int COLOR_CHECKED = 0xff73d216;
 	private static final int COLOR_NORMAL = 0xffbbbbbb;
-	private static final int TAG_TEXT_SIZE = 25;
+	private static final int TAG_TEXT_SIZE = 20;
 
 	private String mText = "";
 	private Paint mPaint;
@@ -84,34 +84,36 @@ public class RRTagTextView extends View {
 	 */
 	@Override
 	protected void onDraw(Canvas canvas) {
+		Paint p = mPaint;
+		
 		if (mChecked)
-			mPaint.setColor(COLOR_CHECKED);
+			p.setColor(COLOR_CHECKED);
 		else
-			mPaint.setColor(COLOR_NORMAL);
+			p.setColor(COLOR_NORMAL);
 
-		mPaint.setShadowLayer(2.0f, 0, 0, Color.BLACK);
+		p.setShadowLayer(2.0f, 0, 0, Color.BLACK);
 
 		int vw = getWidth();
 		int vh = getHeight();
 		mDrawingTmpRect.set(PADDING_HORZ, PADDING_VERT, vw - PADDING_HORZ, vh
 				- PADDING_VERT);
-		mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-		mPaint.setStrokeWidth(3.0f);
-		canvas.drawRoundRect(mDrawingTmpRect, 10.0f, 10.0f, mPaint);
+		p.setStyle(Paint.Style.FILL_AND_STROKE);
+		p.setStrokeWidth(3.0f);
+		canvas.drawRoundRect(mDrawingTmpRect, 10.0f, 10.0f, p);
 
-		mPaint.setStyle(Paint.Style.FILL);
+		p.setStyle(Paint.Style.FILL);
 
-		mPaint.setColor(Color.WHITE);
+		p.setColor(Color.WHITE);
 		canvas.drawText(mText, vw / 2 - mBounds.width() / 2, vh / 2
-				+ mBounds.height() / 3, mPaint);
-		mPaint.setShadowLayer(0.0f, 0, 0, Color.BLACK);
+				+ mBounds.height() / 3, p);
+		p.setShadowLayer(0.0f, 0, 0, Color.BLACK);
 
 		/*
 		 * Draw delete mark.
 		 */
 		if (mShowDeleteMark) {
 			canvas.drawBitmap(mDeleteBmp, vw - mDeleteBmp.getWidth() - 2, vh
-					/ 2 - mDeleteBmp.getHeight() / 2, mPaint);
+					/ 2 - mDeleteBmp.getHeight() / 2, p);
 		}
 	}
 

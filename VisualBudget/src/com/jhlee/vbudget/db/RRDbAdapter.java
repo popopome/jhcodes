@@ -19,7 +19,7 @@ public class RRDbAdapter {
 
 	private static final String LOG = "RRDbAdapter";
 
-	private static final int DB_VERSION = 16;
+	private static final int DB_VERSION = 17;
 
 	/* KEYS for RECEIPT TABLE */
 	public static final String KEY_RECEIPT_IMG_FILE = "img_file";
@@ -896,7 +896,7 @@ public class RRDbAdapter {
 					"Vacation" };
 			ContentValues val = new ContentValues();
 			for (int i = defaultTags.length - 1; i >= 0; --i) {
-				val.put("tag_name", defaultTags[i]);
+				val.put("tag_name", defaultTags[i].toLowerCase());
 				db.insert(TABLE_TAG_SOURCE, null, val);
 				val.clear();
 			}

@@ -59,8 +59,13 @@ public class RRTagDataProviderFromDb implements RRTagDataProvider {
 		
 		/* Check tag */
 		if(checked == true) {
-			Assert.assertEquals(true, this.hasValidReceiptId());
-			mDbAdapter.addTagToReceipt(mActiveReceiptId, tag);
+			/*
+			 * New tag can be created during entering expense data.
+			 * Hence we check receipt id validity. 
+			 */
+			if(true == this.hasValidReceiptId()) {
+				mDbAdapter.addTagToReceipt(mActiveReceiptId, tag);
+			}
 		}
 		
 		return true;

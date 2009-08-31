@@ -271,6 +271,20 @@ public class RRTransactionEditDialog extends Dialog {
 			mSelectedTags.remove(tag);
 		}
 		
+		
+		/*
+		 * Override the method in order to catch new tag is checked or not
+		 */
+		@Override
+		public boolean addTag(String tag, boolean checked) {
+			boolean bresult = super.addTag(tag, false);
+			if(checked == true)
+				mSelectedTags.add(tag);
+			return bresult;
+		}
+		
+		
+		
 	};
 	
 }
