@@ -88,9 +88,8 @@ public class RRMonthBudgetView extends LinearLayout {
 						mProvider.getBudgetItem(mYear, mMonth, dataPosition,
 								mTmpBudgetItemData);
 
-						/* If budget item listener is clicked,
-						 * then use it.
-						 * 
+						/*
+						 * If budget item listener is clicked, then use it.
 						 */
 						if (mBudgetItemClickListener != null) {
 							mBudgetItemClickListener.onBudgetItemClicked(mYear,
@@ -210,6 +209,7 @@ public class RRMonthBudgetView extends LinearLayout {
 	 * Delete budget item
 	 */
 	private void deleteBudgetItem(String budgetName) {
+
 		mProvider.deleteBudgetItem(mYear, mMonth, budgetName);
 
 		mProvider.refreshData();
@@ -297,8 +297,42 @@ public class RRMonthBudgetView extends LinearLayout {
 
 							@Override
 							public void onDeleteButtonClicked(View view) {
-								RRMonthBudgetView.this
-										.deleteBudgetItem(budgetName);
+								/*
+								 * Ask to user Are you sure to delete the item?
+								 */
+								new AlertDialog.Builder(RRMonthBudgetView.this
+										.getContext())
+										.setTitle(
+												"Are you sure to delete the budget?")
+										.setPositiveButton(
+												"Yes",
+												new DialogInterface.OnClickListener() {
+													public void onClick(
+															DialogInterface dialog,
+															int whichButton) {
+
+														/*
+														 * User clicked OK so do
+														 * some stuff
+														 */
+														RRMonthBudgetView.this
+																.deleteBudgetItem(budgetName);
+													}
+												})
+										.setNegativeButton(
+												"No",
+												new DialogInterface.OnClickListener() {
+													public void onClick(
+															DialogInterface dialog,
+															int whichButton) {
+
+														/*
+														 * User clicked Cancel
+														 * so do some stuff
+														 */
+													}
+												}).create().show();
+
 							}
 
 						});

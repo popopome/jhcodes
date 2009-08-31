@@ -21,7 +21,7 @@ public class RRCalendarSelectDialog extends Dialog {
 		super(context);
 		/* Start with no title */
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		this.setContentView(R.layout.rr_celendar_select_dialog);
+		this.setContentView(R.layout.celendar_select_dialog);
 		
 		final RRCalendarStreamView calView = (RRCalendarStreamView)findViewById(R.id.calendar_stream_view);
 		final RRCalendarSelectDialog self = this;

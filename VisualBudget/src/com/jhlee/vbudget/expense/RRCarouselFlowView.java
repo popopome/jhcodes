@@ -96,6 +96,8 @@ public class RRCarouselFlowView extends View {
 	private int mMouseDownX;
 	private int mActiveSeqAtMouseDown;
 	private long mMouseDownMillis;
+	
+	private Rect mTmpDrawingRect = new Rect();
 
 	private OnCarouselActiveItemClickListener mOnActiveItemClickListener = null;
 	private OnCarouselItemCustomDrawListener mOnCustomDrawListener = null;
@@ -356,6 +358,7 @@ public class RRCarouselFlowView extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 
+		Paint p = mPaint;
 //		canvas.drawColor(Color.LTGRAY);
 
 		/**
@@ -366,25 +369,42 @@ public class RRCarouselFlowView extends View {
 			/* There is no item at here */
 			return;
 		}
-		
+
+		int vw = getWidth();
 		if (null != mOnCustomDrawListener) {
+			int l = 0;
+			int r1 = 0;
 			for (RRCarouselItem item : mSortedItems) {
+				l = item.x - (item.w >>1) + 10;
+				if(l >= vw)
+					continue;
+				r1 = l + item.w - 10;
+				if(r1 < 0)
+					continue;
+				
 				mOnCustomDrawListener.onDraw(this, canvas, item,
 						item == activeItem);
 			}
 			return;
 		}
 
+		
 		/** Default drawing */
-		mPaint.setColor(Color.WHITE);
-		Rect r = new Rect();
+		p.setColor(Color.WHITE);
+		Rect r = mTmpDrawingRect;
 		for (RRCarouselItem item : mSortedItems) {
 			r.left = item.x - item.w / 2 + 10;
-			r.top = item.y - item.h / 2 + 10;
+			if(r.left >= vw)
+				continue;
 			r.right = r.left + item.w - 10;
+			if(r.right <= 0)
+				continue;
+			
+			r.top = item.y - item.h / 2 + 10;
+			
 			r.bottom = r.top + item.h - 10;
-			mPaint.setColor(item.color);
-			canvas.drawRect(r, mPaint);
+			p.setColor(item.color);
+			canvas.drawRect(r, p);
 		}
 	}
 
@@ -444,8 +464,10 @@ public class RRCarouselFlowView extends View {
 			item.virtual_x = item.seq * mItemWidth;
 		}
 
-		if (activeItem != null)
-			this.moveCameraRel(activeItem.x);
+		if (activeItem != null) {
+			setActiveItem(activeItem.seq);
+		}
+//			this.moveCameraRel(activeItem.x);
 	}
 
 	/**

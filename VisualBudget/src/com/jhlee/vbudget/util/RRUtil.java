@@ -1,15 +1,20 @@
 package com.jhlee.vbudget.util;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.SimpleTimeZone;
 
+import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class RRUtil {
+	private static final String TAG = "RRUtil";
 	public static String[] mMonthStr;
 	public static SimpleDateFormat mDataFormatter = new SimpleDateFormat("MM-dd-yyyy");
 	public static SimpleDateFormat mGMTDataFormatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -68,4 +73,43 @@ public class RRUtil {
 		return li.inflate(layoutId, parent, true);
 	}
 	
+	public static FileOutputStream openFileOutputStream(Activity activity,
+			String filePath) {
+		FileOutputStream stm = null;
+		try {
+			/* Create new file */
+			/* outputFile.createNewFile();*/
+			stm = new FileOutputStream(filePath);
+		} catch(Exception e) {
+			try {
+				stm = activity.openFileOutput(filePath, Context.MODE_WORLD_READABLE);
+			} 
+			catch(Exception e2) {
+				Log.e(TAG, "Unable to open file");
+				return null;
+			}
+		}
+		
+		return stm;
+	}
+	
+	public static FileInputStream openFileInputStream(Activity activity,
+			String filePath) {
+		FileInputStream stm = null;
+		try {
+			/* Create new file */
+			/* outputFile.createNewFile();*/
+			stm = new FileInputStream(filePath);
+		} catch(Exception e) {
+			try {
+				stm = activity.openFileInput(filePath);
+			} 
+			catch(Exception e2) {
+				Log.e(TAG, "Unable to open file");
+				return null;
+			}
+		}
+		
+		return stm;
+	}
 }

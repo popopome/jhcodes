@@ -1,7 +1,11 @@
 package com.jhlee.vbudget.expense;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import junit.framework.Assert;
 import android.app.AlertDialog;
@@ -48,6 +52,9 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	private static final String TAG = "rrdailyExpenseCarouselView";
 	private static final String POSTFIX_REFLECTION_BMP = "@#$";
 
+	private static final int MAXIMUM_BITMAP_COUNT = 40;
+	private static final int RECOMMENDED_BITMAP_COUNT = 30;
+
 	private int COL_INDEX_SMALL_IMAGE_FILE_PATH = -1;
 	private int COL_INDEX_RECEIPT_TOTAL = -1;
 	private int COL_INDEX_RECEIPT_TAKEN_DATE = -1;
@@ -65,6 +72,8 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	private RRDbAdapter mAdapter;
 	private Cursor mCursor;
 
+	private Bitmap mDefaultPhoto;
+
 	private ItemBitmapContainer mBmpContainer = new ItemBitmapContainer();
 
 	/*
@@ -72,6 +81,7 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	 */
 
 	private HashMap<String, Bitmap> mBmpPool = new HashMap<String, Bitmap>();
+	private HashMap<String, Long> mBmpAgePool = new HashMap<String, Long>();
 
 	private Matrix mMatrixZoomToFit = new Matrix();
 	private RRTagDataProviderFromDb mTagDataProvider;
@@ -101,9 +111,13 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		mExpenseWrapperViewGroup = mFrameView
 				.findViewById(R.id.expense_wrapper);
 		mEmptyDataView = mFrameView.findViewById(R.id.expense_empty);
-//		mBudgetButton = (ImageButton) mFrameView
-//				.findViewById(R.id.button_budget);
+		// mBudgetButton = (ImageButton) mFrameView
+		// .findViewById(R.id.button_budget);
 		mDeleteButton = (Button) mFrameView.findViewById(R.id.button_delete);
+
+		mDefaultPhoto = BitmapFactory.decodeResource(
+				RRDailyExpenseCarouselView.this.getResources(),
+				R.drawable.new_trans_small);
 
 		// /* Install back button listener */
 		// Button backButton = (Button)
@@ -129,27 +143,26 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		carouselView
 				.setOnCarouselItemCustomDrawListener(new ReceiptItemCustomDrawer());
 
-//		/* Install money input dialog listener */
-//		initializeMoneyButtonHandler(carouselView);
-//
-//		/* Install date change button */
-//		initializeDateChangeButton(carouselView);
-//
-//		/* Initialize tag box and tag button */
-//		initializeTagBoxAndTagButton();
-//		
-		
-		mTagDataProvider = new RRTagDataProviderFromDb(mAdapter);
-		
+		// /* Install money input dialog listener */
+		// initializeMoneyButtonHandler(carouselView);
+		//
+		// /* Install date change button */
+		// initializeDateChangeButton(carouselView);
+		//
+		// /* Initialize tag box and tag button */
+		// initializeTagBoxAndTagButton();
+		//		
 
-//		/*
-//		 * Budget button is clicked
-//		 */
-//		initializeBudgetButton();
+		mTagDataProvider = new RRTagDataProviderFromDb(mAdapter);
+
+		// /*
+		// * Budget button is clicked
+		// */
+		// initializeBudgetButton();
 
 		/* Give default focus to carousel view */
 		carouselView.requestFocus();
-		
+
 		/*
 		 * Initialize delete button
 		 */
@@ -158,32 +171,36 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 			@Override
 			public void onClick(View v) {
 				long id = getActiveReceiptId();
-				if(id == -1)
+				if (id == -1)
 					return;
-				
-				/* Ask to user
-				 * Are you sure to delete the item?
+
+				/*
+				 * Ask to user Are you sure to delete the item?
 				 */
-				new AlertDialog.Builder(RRDailyExpenseCarouselView.this.getContext())
-                .setTitle("Are you sure to delete the expense?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
+				new AlertDialog.Builder(RRDailyExpenseCarouselView.this
+						.getContext()).setTitle(
+						"Are you sure to delete the expense?")
+						.setPositiveButton("Yes",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int whichButton) {
 
-                        /* User clicked OK so do some stuff */
-                    	RRDailyExpenseCarouselView.this.deleteActiveItem();
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
+										/* User clicked OK so do some stuff */
+										RRDailyExpenseCarouselView.this
+												.deleteActiveItem();
+									}
+								}).setNegativeButton("No",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int whichButton) {
 
-                        /* User clicked Cancel so do some stuff */
-                    }
-                })
-                .create().show();
+										/* User clicked Cancel so do some stuff */
+									}
+								}).create().show();
 			}
-			
+
 		});
-		
+
 		/*
 		 * Update x button position
 		 */
@@ -192,7 +209,7 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		/* Let's check there is data or not. */
 		return showViewByDataExistence();
 	}
-	
+
 	/*
 	 * Delete active item
 	 */
@@ -200,72 +217,72 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		long id = getActiveReceiptId();
 		RRCarouselItem item = mCarouselView.getActiveItem();
 		int oldSeq = item.seq;
-		
+
 		/* Delete data from Db */
-		if(false == mAdapter.deleteExpense(id)) {
+		if (false == mAdapter.deleteExpense(id)) {
 			Log.e(TAG, "Unable to delete receipt");
 			return;
 		}
-		
+
 		/*
 		 * Refresh content
 		 */
 		refreshContent();
-		
+
 		int cnt = mCursor.getCount();
-		if(cnt <= oldSeq) {
+		if (cnt <= oldSeq) {
 			oldSeq = cnt - 1;
 		}
-		
-		if(oldSeq >= 0)
+
+		if (oldSeq >= 0)
 			mCarouselView.setActiveItem(oldSeq);
-		
+
 		/*
 		 * Check data existence
 		 */
 		showViewByDataExistence();
-		
+
 		invalidate();
 	}
 
-//	private void initializeBudgetButton() {
-//		mBudgetButton.setOnClickListener(new View.OnClickListener() {
-//
-//			@Override
-//			public void onClick(View v) {
-//				/* Show budet dialog */
-//				final RRBudgetSelectDialog budgetDlg = new RRBudgetSelectDialog(
-//						RRDailyExpenseCarouselView.this.getContext());
-//				budgetDlg.initialize(mAdapter);
-//
-//				budgetDlg
-//						.setOnDismissListener(new DialogInterface.OnDismissListener() {
-//
-//							@Override
-//							public void onDismiss(DialogInterface dialog) {
-//								if (budgetDlg.isCanceled())
-//									return;
-//
-//								String budgetName = budgetDlg
-//										.getSelectedBudgetName();
-//								int budgetYear = budgetDlg
-//										.getSelectedBudgetYear();
-//								int budgetMonth = budgetDlg
-//										.getSelectedBudgetMonth();
-//								long budgetBalance = budgetDlg
-//										.getSelectedBudgetBalance();
-//								applyBudget(budgetYear, budgetMonth,
-//										budgetName, budgetBalance);
-//
-//							}
-//
-//						});
-//
-//				budgetDlg.show();
-//			}
-//
-//		});
-//	}
+	// private void initializeBudgetButton() {
+	// mBudgetButton.setOnClickListener(new View.OnClickListener() {
+	//
+	// @Override
+	// public void onClick(View v) {
+	// /* Show budet dialog */
+	// final RRBudgetSelectDialog budgetDlg = new RRBudgetSelectDialog(
+	// RRDailyExpenseCarouselView.this.getContext());
+	// budgetDlg.initialize(mAdapter);
+	//
+	// budgetDlg
+	// .setOnDismissListener(new DialogInterface.OnDismissListener() {
+	//
+	// @Override
+	// public void onDismiss(DialogInterface dialog) {
+	// if (budgetDlg.isCanceled())
+	// return;
+	//
+	// String budgetName = budgetDlg
+	// .getSelectedBudgetName();
+	// int budgetYear = budgetDlg
+	// .getSelectedBudgetYear();
+	// int budgetMonth = budgetDlg
+	// .getSelectedBudgetMonth();
+	// long budgetBalance = budgetDlg
+	// .getSelectedBudgetBalance();
+	// applyBudget(budgetYear, budgetMonth,
+	// budgetName, budgetBalance);
+	//
+	// }
+	//
+	// });
+	//
+	// budgetDlg.show();
+	// }
+	//
+	// });
+	// }
 
 	/*
 	 * Apply budget
@@ -307,149 +324,146 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	/*
 	 * Initialize tag box and tag button
 	 */
-//	private void initializeTagBoxAndTagButton() {
-//		/* Set tag data provider */
-//		/*
-//		 * final RRTagBox tagBox = (RRTagBox)
-//		 * mFrameView.findViewById(R.id.tag_box); mTagDataProvider = new
-//		 * RRTagDataProviderFromDb(mAdapter);
-//		 * tagBox.setTagProvider(mTagDataProvider);
-//		 */
-//		mTagDataProvider = new RRTagDataProviderFromDb(mAdapter);
-//
-//		/* Initialize tag button */
-//		Button tagButton = (Button) findViewById(R.id.button_tag);
-//		tagButton.setOnClickListener(new View.OnClickListener() {
-//			public void onClick(View v) {
-//				/* Set active receipt id */
-//				mTagDataProvider.setActiveReceiptId(getActiveReceiptId());
-//
-//				/* Show tag selection dialog */
-//				final RRTagSelectDialog dlg = new RRTagSelectDialog(
-//						RRDailyExpenseCarouselView.this.getContext());
-//				dlg
-//						.setOnDismissListener(new DialogInterface.OnDismissListener() {
-//							/* Dialog dismissed */
-//							@Override
-//							public void onDismiss(DialogInterface dialog) {
-//								if (dlg.isCanceled())
-//									return;
-//							}
-//
-//						});
-//				dlg.initialize(mTagDataProvider);
-//				dlg.show();
-//			}
-//		});
-//	}
-
-//	private void initializeDateChangeButton(
-//			final RRCarouselFlowView carouselView) {
-//		Button datePickBtn = (Button) findViewById(R.id.button_date_pick);
-//		datePickBtn.setOnClickListener(new View.OnClickListener() {
-//			/*
-//			 * Date pick button is clicked. Show date pick dialog & change date
-//			 */
-//			public void onClick(View v) {
-//				final RRCalendarSelectDialog dlg = new RRCalendarSelectDialog(
-//						RRDailyExpenseCarouselView.this.getContext());
-//				dlg
-//						.setOnDismissListener(new DialogInterface.OnDismissListener() {
-//							public void onDismiss(DialogInterface dialog) {
-//								if (false == dlg.isDateSelected())
-//									return;
-//								/* Date is selected */
-//								RRCarouselItem item = carouselView
-//										.getActiveItem();
-//								mCursor.moveToPosition(item.seq);
-//								/* Assume 0th is id */
-//								int id = mCursor.getInt(0);
-//								/* Update db. */
-//								mAdapter.updateDate(mCursor, dlg
-//										.getSelectedDateInMillis());
-//								/* Refresh db cursor */
-//								RRDailyExpenseCarouselView.this
-//										.refreshContent();
-//
-//								/*
-//								 * Let's keep current view position. To do that
-//								 * first we find new sequence of the item and
-//								 * then move to that sequence.
-//								 */
-//								int newSeq = 0;
-//								mCursor.moveToFirst();
-//								if (mCursor.getCount() > 0) {
-//
-//									while (mCursor.isAfterLast() == false) {
-//										if (mCursor.getInt(0) == id)
-//											break;
-//										mCursor.moveToNext();
-//										++newSeq;
-//									}
-//								}
-//								carouselView.setActiveItem(newSeq);
-//
-//								/* Invalidate view */
-//								carouselView.invalidate();
-//
-//							}
-//						});
-//
-//				/* Get date information */
-//				mCursor.moveToPosition(carouselView.getActiveItem().seq);
-//				String dateStr = RRUtil.formatCalendar(mCursor.getLong(mCursor
-//						.getColumnIndex(RRDbAdapter.KEY_RECEIPT_TAKEN_DATE)));
-//				dlg.setActiveDate(dateStr);
-//
-//				/* Show dialog */
-//				dlg.show();
-//			}
-//		});
-//	}
-
-//	private void initializeMoneyButtonHandler(
-//			final RRCarouselFlowView carouselView) {
-//		Button moneyButton = (Button) this.findViewById(R.id.button_numpad);
-//		moneyButton.setOnClickListener(new Button.OnClickListener() {
-//			/* Money input button is clicked */
-//			public void onClick(View v) {
-//
-//				final RRCarouselItem item = carouselView.getActiveItem();
-//				/* Move cursor position */
-//				mCursor.moveToPosition(item.seq);
-//				/* Get total amount of money */
-//				int packedTotal = mCursor.getInt(mCursor
-//						.getColumnIndex(RRDbAdapter.KEY_RECEIPT_TOTAL));
-//
-//				/* Show money input dialog */
-//				final RRMoneyInputDialog inputDlg = new RRMoneyInputDialog(
-//						RRDailyExpenseCarouselView.this.getContext());
-//				inputDlg.setMoney(packedTotal / 100, packedTotal % 100);
-//				inputDlg.setOnDismissListener(new OnDismissListener() {
-//					public void onDismiss(DialogInterface dialog) {
-//						/*
-//						 * Money input dialog is dismissed. Let's save if we
-//						 * should do
-//						 */
-//						if (inputDlg.isCanceled())
-//							return;
-//
-//						/* Insert new total money to db */
-//						mCursor.moveToPosition(item.seq);
-//						int rid = mCursor.getInt(0);
-//						mAdapter.updateTotalMoney(rid, inputDlg.getDollars(),
-//								inputDlg.getCents());
-//						/* Refresh db items */
-//						RRDailyExpenseCarouselView.this.refreshContent();
-//						/* Invalidate screen */
-//						carouselView.invalidate();
-//					}
-//				});
-//				inputDlg.show();
-//			}
-//		});
-//	}
-
+	// private void initializeTagBoxAndTagButton() {
+	// /* Set tag data provider */
+	// /*
+	// * final RRTagBox tagBox = (RRTagBox)
+	// * mFrameView.findViewById(R.id.tag_box); mTagDataProvider = new
+	// * RRTagDataProviderFromDb(mAdapter);
+	// * tagBox.setTagProvider(mTagDataProvider);
+	// */
+	// mTagDataProvider = new RRTagDataProviderFromDb(mAdapter);
+	//
+	// /* Initialize tag button */
+	// Button tagButton = (Button) findViewById(R.id.button_tag);
+	// tagButton.setOnClickListener(new View.OnClickListener() {
+	// public void onClick(View v) {
+	// /* Set active receipt id */
+	// mTagDataProvider.setActiveReceiptId(getActiveReceiptId());
+	//
+	// /* Show tag selection dialog */
+	// final RRTagSelectDialog dlg = new RRTagSelectDialog(
+	// RRDailyExpenseCarouselView.this.getContext());
+	// dlg
+	// .setOnDismissListener(new DialogInterface.OnDismissListener() {
+	// /* Dialog dismissed */
+	// @Override
+	// public void onDismiss(DialogInterface dialog) {
+	// if (dlg.isCanceled())
+	// return;
+	// }
+	//
+	// });
+	// dlg.initialize(mTagDataProvider);
+	// dlg.show();
+	// }
+	// });
+	// }
+	// private void initializeDateChangeButton(
+	// final RRCarouselFlowView carouselView) {
+	// Button datePickBtn = (Button) findViewById(R.id.button_date_pick);
+	// datePickBtn.setOnClickListener(new View.OnClickListener() {
+	// /*
+	// * Date pick button is clicked. Show date pick dialog & change date
+	// */
+	// public void onClick(View v) {
+	// final RRCalendarSelectDialog dlg = new RRCalendarSelectDialog(
+	// RRDailyExpenseCarouselView.this.getContext());
+	// dlg
+	// .setOnDismissListener(new DialogInterface.OnDismissListener() {
+	// public void onDismiss(DialogInterface dialog) {
+	// if (false == dlg.isDateSelected())
+	// return;
+	// /* Date is selected */
+	// RRCarouselItem item = carouselView
+	// .getActiveItem();
+	// mCursor.moveToPosition(item.seq);
+	// /* Assume 0th is id */
+	// int id = mCursor.getInt(0);
+	// /* Update db. */
+	// mAdapter.updateDate(mCursor, dlg
+	// .getSelectedDateInMillis());
+	// /* Refresh db cursor */
+	// RRDailyExpenseCarouselView.this
+	// .refreshContent();
+	//
+	// /*
+	// * Let's keep current view position. To do that
+	// * first we find new sequence of the item and
+	// * then move to that sequence.
+	// */
+	// int newSeq = 0;
+	// mCursor.moveToFirst();
+	// if (mCursor.getCount() > 0) {
+	//
+	// while (mCursor.isAfterLast() == false) {
+	// if (mCursor.getInt(0) == id)
+	// break;
+	// mCursor.moveToNext();
+	// ++newSeq;
+	// }
+	// }
+	// carouselView.setActiveItem(newSeq);
+	//
+	// /* Invalidate view */
+	// carouselView.invalidate();
+	//
+	// }
+	// });
+	//
+	// /* Get date information */
+	// mCursor.moveToPosition(carouselView.getActiveItem().seq);
+	// String dateStr = RRUtil.formatCalendar(mCursor.getLong(mCursor
+	// .getColumnIndex(RRDbAdapter.KEY_RECEIPT_TAKEN_DATE)));
+	// dlg.setActiveDate(dateStr);
+	//
+	// /* Show dialog */
+	// dlg.show();
+	// }
+	// });
+	// }
+	// private void initializeMoneyButtonHandler(
+	// final RRCarouselFlowView carouselView) {
+	// Button moneyButton = (Button) this.findViewById(R.id.button_numpad);
+	// moneyButton.setOnClickListener(new Button.OnClickListener() {
+	// /* Money input button is clicked */
+	// public void onClick(View v) {
+	//
+	// final RRCarouselItem item = carouselView.getActiveItem();
+	// /* Move cursor position */
+	// mCursor.moveToPosition(item.seq);
+	// /* Get total amount of money */
+	// int packedTotal = mCursor.getInt(mCursor
+	// .getColumnIndex(RRDbAdapter.KEY_RECEIPT_TOTAL));
+	//
+	// /* Show money input dialog */
+	// final RRMoneyInputDialog inputDlg = new RRMoneyInputDialog(
+	// RRDailyExpenseCarouselView.this.getContext());
+	// inputDlg.setMoney(packedTotal / 100, packedTotal % 100);
+	// inputDlg.setOnDismissListener(new OnDismissListener() {
+	// public void onDismiss(DialogInterface dialog) {
+	// /*
+	// * Money input dialog is dismissed. Let's save if we
+	// * should do
+	// */
+	// if (inputDlg.isCanceled())
+	// return;
+	//
+	// /* Insert new total money to db */
+	// mCursor.moveToPosition(item.seq);
+	// int rid = mCursor.getInt(0);
+	// mAdapter.updateTotalMoney(rid, inputDlg.getDollars(),
+	// inputDlg.getCents());
+	// /* Refresh db items */
+	// RRDailyExpenseCarouselView.this.refreshContent();
+	// /* Invalidate screen */
+	// carouselView.invalidate();
+	// }
+	// });
+	// inputDlg.show();
+	// }
+	// });
+	// }
 	/*
 	 * Refresh content
 	 */
@@ -461,9 +475,23 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 			/* TODO: Show receipt data first */
 			Log.e(TAG, "NO expense data-----------------!");
 		}
+
 		/* Initialize carousel view */
 		final RRCarouselFlowView carouselView = (RRCarouselFlowView) findViewById(R.id.carouselView);
+
+		int oldSeq = -1;
+		RRCarouselItem activeItem = carouselView.getActiveItem();
+		if (activeItem != null)
+			oldSeq = activeItem.seq;
+
 		carouselView.initialize(numOfReceipts, 120, 160, 60, 9, 25);
+
+		if (oldSeq != -1) {
+			int newSeq = Math.min(oldSeq, numOfReceipts - 1);
+			carouselView.setActiveItem(newSeq);
+		} else {
+			carouselView.setActiveItem(numOfReceipts - 1);
+		}
 
 		/*
 		 * Show view by data data existence
@@ -496,16 +524,17 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	/**
 	 * Item is clicked within carousel item
 	 */
-	public void onCarouselItemClicked(RRCarouselFlowView view, RRCarouselItem item) {
+	public void onCarouselItemClicked(RRCarouselFlowView view,
+			RRCarouselItem item) {
 		mCursor.moveToPosition(item.seq);
 		long rid = mCursor.getInt(0);
 
 		/** See receipt list */
-		
+
 		Intent i = new Intent(this.getContext(), RRDetailExpenseActivity.class);
 		i.putExtra(RRDetailExpenseActivity.RECEIPT_ID, rid);
 		this.getContext().startActivity(i);
-		 
+
 		// if(mHost != null) {
 		// mHost.showMoneyContent(VisualBudget.RR_CMD_DETAIL_EXPENSE, rid,
 		// null);
@@ -521,28 +550,32 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		Assert.assertTrue(view != null);
 
 		RRCarouselItem item = view.getActiveItem();
-		Assert.assertTrue(item != null);
+		if (null == item)
+			return -1;
+		if (mCursor.getCount() < 1)
+			return -1;
 
 		mCursor.moveToPosition(item.seq);
 		/* Assume 0 indicates id */
 		return mCursor.getInt(0);
 	}
-	
-	
 
 	@Override
 	public void createMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.menu_detail_view, menu);
 	}
-	
-	
+
 	/*
 	 * Menu item is selected
 	 */
 	@Override
 	public void onMenuItemSelected(MenuItem mi) {
 
-		switch(mi.getItemId()) {
+		int activeId = getActiveReceiptId();
+		if (activeId == -1)
+			return;
+
+		switch (mi.getItemId()) {
 		case R.id.menu_budget:
 			changeBudgetWithUser();
 			break;
@@ -557,7 +590,7 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 			break;
 		}
 	}
-	
+
 	private void changeTagWithUser() {
 		/* Set active receipt id */
 		mTagDataProvider.setActiveReceiptId(getActiveReceiptId());
@@ -565,67 +598,63 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		/* Show tag selection dialog */
 		final RRTagSelectDialog dlg = new RRTagSelectDialog(
 				RRDailyExpenseCarouselView.this.getContext());
-		dlg
-				.setOnDismissListener(new DialogInterface.OnDismissListener() {
-					/* Dialog dismissed */
-					@Override
-					public void onDismiss(DialogInterface dialog) {
-						if (dlg.isCanceled())
-							return;
-					}
+		dlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			/* Dialog dismissed */
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				if (dlg.isCanceled())
+					return;
 
-				});
+				mCarouselView.invalidate();
+			}
+
+		});
 		dlg.initialize(mTagDataProvider);
 		dlg.show();
 	}
-	
+
 	/*
 	 * Date pick button is clicked. Show date pick dialog & change date
 	 */
 	private void changeDateWithUser() {
 		final RRCalendarSelectDialog dlg = new RRCalendarSelectDialog(
 				RRDailyExpenseCarouselView.this.getContext());
-		dlg
-				.setOnDismissListener(new DialogInterface.OnDismissListener() {
-					public void onDismiss(DialogInterface dialog) {
-						if (false == dlg.isDateSelected())
-							return;
-						/* Date is selected */
-						RRCarouselItem item = mCarouselView
-								.getActiveItem();
-						mCursor.moveToPosition(item.seq);
-						/* Assume 0th is id */
-						int id = mCursor.getInt(0);
-						/* Update db. */
-						mAdapter.updateDate(mCursor, dlg
-								.getSelectedDateInMillis());
-						/* Refresh db cursor */
-						RRDailyExpenseCarouselView.this
-								.refreshContent();
+		dlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			public void onDismiss(DialogInterface dialog) {
+				if (false == dlg.isDateSelected())
+					return;
+				/* Date is selected */
+				RRCarouselItem item = mCarouselView.getActiveItem();
+				mCursor.moveToPosition(item.seq);
+				/* Assume 0th is id */
+				int id = mCursor.getInt(0);
+				/* Update db. */
+				mAdapter.updateDate(mCursor, dlg.getSelectedDateInMillis());
+				/* Refresh db cursor */
+				RRDailyExpenseCarouselView.this.refreshContent();
 
-						/*
-						 * Let's keep current view position. To do that
-						 * first we find new sequence of the item and
-						 * then move to that sequence.
-						 */
-						int newSeq = 0;
-						mCursor.moveToFirst();
-						if (mCursor.getCount() > 0) {
+				/*
+				 * Let's keep current view position. To do that first we find
+				 * new sequence of the item and then move to that sequence.
+				 */
+				int newSeq = 0;
+				mCursor.moveToFirst();
+				if (mCursor.getCount() > 0) {
 
-							while (mCursor.isAfterLast() == false) {
-								if (mCursor.getInt(0) == id)
-									break;
-								mCursor.moveToNext();
-								++newSeq;
-							}
-						}
-						mCarouselView.setActiveItem(newSeq);
-
-						/* Invalidate view */
-						mCarouselView.invalidate();
-
+					while (mCursor.isAfterLast() == false) {
+						if (mCursor.getInt(0) == id)
+							break;
+						mCursor.moveToNext();
+						++newSeq;
 					}
-				});
+				}
+				mCarouselView.setActiveItem(newSeq);
+
+				/* Invalidate view */
+				mCarouselView.invalidate();
+
+			}
+		});
 
 		/* Get date information */
 		mCursor.moveToPosition(mCarouselView.getActiveItem().seq);
@@ -636,10 +665,11 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		/* Show dialog */
 		dlg.show();
 	}
-	
+
 	/* Money input button is clicked */
 	private void changeMoneyWithUser() {
-		final RRCarouselFlowView carouselView = (RRCarouselFlowView) this.findViewById(R.id.carouselView);
+		final RRCarouselFlowView carouselView = (RRCarouselFlowView) this
+				.findViewById(R.id.carouselView);
 		final RRCarouselItem item = carouselView.getActiveItem();
 		/* Move cursor position */
 		mCursor.moveToPosition(item.seq);
@@ -654,8 +684,7 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		inputDlg.setOnDismissListener(new OnDismissListener() {
 			public void onDismiss(DialogInterface dialog) {
 				/*
-				 * Money input dialog is dismissed. Let's save if we
-				 * should do
+				 * Money input dialog is dismissed. Let's save if we should do
 				 */
 				if (inputDlg.isCanceled())
 					return;
@@ -673,34 +702,29 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		});
 		inputDlg.show();
 	}
+
 	private void changeBudgetWithUser() {
 		/* Show budet dialog */
 		final RRBudgetSelectDialog budgetDlg = new RRBudgetSelectDialog(
 				RRDailyExpenseCarouselView.this.getContext());
 		budgetDlg.initialize(mAdapter);
 
-		budgetDlg
-				.setOnDismissListener(new DialogInterface.OnDismissListener() {
+		budgetDlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
 
-					@Override
-					public void onDismiss(DialogInterface dialog) {
-						if (budgetDlg.isCanceled())
-							return;
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				if (budgetDlg.isCanceled())
+					return;
 
-						String budgetName = budgetDlg
-								.getSelectedBudgetName();
-						int budgetYear = budgetDlg
-								.getSelectedBudgetYear();
-						int budgetMonth = budgetDlg
-								.getSelectedBudgetMonth();
-						long budgetBalance = budgetDlg
-								.getSelectedBudgetBalance();
-						applyBudget(budgetYear, budgetMonth,
-								budgetName, budgetBalance);
+				String budgetName = budgetDlg.getSelectedBudgetName();
+				int budgetYear = budgetDlg.getSelectedBudgetYear();
+				int budgetMonth = budgetDlg.getSelectedBudgetMonth();
+				long budgetBalance = budgetDlg.getSelectedBudgetBalance();
+				applyBudget(budgetYear, budgetMonth, budgetName, budgetBalance);
 
-					}
+			}
 
-				});
+		});
 
 		budgetDlg.show();
 	}
@@ -730,7 +754,6 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 					.getColumnIndex(RRDbAdapter.KEY_BUDGET_NAME);
 		}
 	}
-
 
 	/*
 	 * Active item is changed
@@ -825,19 +848,63 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 			/* Load bitmap from file */
 			if (0 == imgFileName.compareTo("NTS")) {
 				/* Use default small image */
-				bmpContainer.mBmp = BitmapFactory.decodeResource(
-						RRDailyExpenseCarouselView.this.getResources(),
-						R.drawable.new_trans_small);
+				bmpContainer.mBmp = mDefaultPhoto;
 			} else {
 				bmpContainer.mBmp = BitmapFactory.decodeFile(imgFileName);
+				if (bmpContainer.mBmp == null)
+					bmpContainer.mBmp = mDefaultPhoto;
+			}
+
+			/*
+			 * Let's remove bitmap from memory
+			 */
+
+			if (mBmpPool.size() > MAXIMUM_BITMAP_COUNT) {
+				makeFreeSpaceForBitmap();
 			}
 
 			mBmpPool.put(imgFileName, bmpContainer.mBmp);
+			// if(mBmpAgePool.containsKey(imgFileName)) {
+			// mBmpAgePool.remove(imgFileName);
+			// }
+			mBmpAgePool.put(imgFileName, Calendar.getInstance()
+					.getTimeInMillis());
+
 			/* Generate reflected bitmap */
 			bmpContainer.mReflectedBmp = this
 					.createReflectedBitmap(bmpContainer.mBmp);
 			mBmpPool.put(imgFileName + POSTFIX_REFLECTION_BMP,
 					bmpContainer.mReflectedBmp);
+		}
+	}
+
+	private void makeFreeSpaceForBitmap() {
+		HashMap<String, Long> a = mBmpAgePool;
+		/* Let's find oldest string */
+		Set<String> s = a.keySet();
+		Iterator it = null;
+		String key;
+		String oldestKey = null;
+		while (mBmpPool.size() > RECOMMENDED_BITMAP_COUNT) {
+			it = s.iterator();
+			oldestKey = null;
+			long oldest = Long.MAX_VALUE;
+			while (it.hasNext()) {
+				key = (String) it.next();
+				long val = a.get(key);
+				if (val < oldest) {
+					oldest = val;
+					oldestKey = key;
+				}
+			}
+
+			if (oldestKey != null) {
+				mBmpPool.remove(oldestKey);
+				a.remove(oldestKey);
+				mBmpPool.remove(oldestKey + POSTFIX_REFLECTION_BMP);
+				s.remove(oldestKey);
+			} else
+				break;
 		}
 	}
 
@@ -908,30 +975,28 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		public void onDraw(View view, Canvas canvas, RRCarouselItem item,
 				boolean isItemActive) {
 
+			ItemBitmapContainer cont = mBmpContainer;
+			Matrix matFit = mMatrixZoomToFit;
 			Cursor c = mCursor;
-			getItemBitmaps(mBmpContainer, item, c);
+			getItemBitmaps(cont, item, c);
 
 			int x = item.x - (item.w >> 1);
 			int y = item.y - item.h * 2 / 3;
 
 			/* Compute zoom to fit matrix */
-			zoomToFit(x, y, item.w, item.h, mBmpContainer.mBmp,
-					mMatrixZoomToFit);
-			canvas.drawBitmap(mBmpContainer.mBmp, mMatrixZoomToFit, mPaint);
+			zoomToFit(x, y, item.w, item.h, cont.mBmp, matFit);
+			canvas.drawBitmap(cont.mBmp, matFit, mPaint);
 
 			/* Draw reflection image */
-			mMatrixZoomToFit.postTranslate(0, item.h);
-			canvas.drawBitmap(mBmpContainer.mReflectedBmp, mMatrixZoomToFit,
-					mPaint);
+			matFit.postTranslate(0, item.h);
+			canvas.drawBitmap(cont.mReflectedBmp, matFit, mPaint);
 
 			/*
 			 * Draw money & date
 			 */
 			drawExpenseInformation(canvas, item, isItemActive, y);
-
 		}
 
-		
 		/*
 		 * Draw receipt information
 		 */
@@ -962,8 +1027,11 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 
 				/* Draw budget information */
 				if (false == c.isNull(COL_INDEX_BUDGET_NAME)) {
-					String budgetName = c.getString(COL_INDEX_BUDGET_NAME);
+					String budgetName = "Budget:"
+							+ c.getString(COL_INDEX_BUDGET_NAME);
 					sy += TEXT_SIZE;
+					final int BUDGET_TEXT_COLOR = Color.rgb(164, 212, 125);
+					p.setColor(BUDGET_TEXT_COLOR);
 					canvas.drawText(budgetName, item.x, sy, mPaint);
 				}
 
@@ -973,7 +1041,11 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 				int rid = c.getInt(0);
 				String allTags = mAdapter.queryReceiptTagsAsOneString(rid);
 				if (allTags.length() > 0) {
+
+					allTags = "Tags:" + allTags;
 					/* There is tags */
+					final int TAG_TEXT_COLOR = Color.rgb(239, 186, 108);
+					p.setColor(TAG_TEXT_COLOR);
 					canvas.drawText(allTags, item.x, sy, p);
 				}
 			}

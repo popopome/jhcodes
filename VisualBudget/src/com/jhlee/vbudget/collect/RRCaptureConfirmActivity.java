@@ -16,6 +16,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Bitmap.CompressFormat;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -37,11 +38,18 @@ import com.jhlee.vbudget.util.RRUtil;
 public class RRCaptureConfirmActivity extends Activity {
 
 	private static final String TAG = "RRCaptured";
-	private static final String RECEIPT_SAVING_FOLDER_NAME = "receipts";
 	private String mCapturedFile;
 	private RRDbAdapter mDbAdapter;
 	private Bitmap mCapturedBmp;
 	private int mRotationAngle = 0;
+
+	private Handler mHandler = new Handler();
+	private Runnable mAutoSavingTask = null;
+
+	private RRImageStorageManager mImgStg = new RRImageStorageManager();
+	private String mSavedFilePath;
+	private String mSavedSmallFilePath;
+	private long mSavedId = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +64,9 @@ public class RRCaptureConfirmActivity extends Activity {
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		this.setContentView(R.layout.collect_captured);
+
+		/* Open image storage manager */
+		mImgStg.open(this);
 
 		/** Initialize db adapter */
 		mDbAdapter = new RRDbAdapter(this);
@@ -78,7 +89,14 @@ public class RRCaptureConfirmActivity extends Activity {
 
 		/* Load bitmap from passed file */
 		try {
-			FileInputStream stm = new FileInputStream(mCapturedFile);
+			// FileInputStream stm = this.openFileInput(mCapturedFile);
+			// FileInputStream stm = new FileInputStream(mCapturedFile);
+			FileInputStream stm = RRUtil.openFileInputStream(this,
+					mCapturedFile);
+			if (stm == null) {
+				this.finish();
+				return;
+			}
 			mCapturedBmp = BitmapFactory.decodeStream(stm);
 			if (null == mCapturedBmp) {
 				Log.e(TAG, "Unable to load image:" + mCapturedFile);
@@ -107,12 +125,12 @@ public class RRCaptureConfirmActivity extends Activity {
 			public void onClick(View v) {
 				/** Save captured receipt to db */
 				if (true == self.saveCapturedReceiptToDb(self.mCapturedFile)) {
-					Toast.makeText(self, "Receipt photo is saved",
-							Toast.LENGTH_SHORT).show();
+					Log.v(TAG, "Photo is saved well");
+					// Toast.makeText(self, "Receipt photo is saved",
+					// Toast.LENGTH_SHORT).show();
 				}
-				self.startCameraActivity();
+				// self.startCameraActivity();
 			}
-
 		};
 		Button saveBtn = (Button) findViewById(R.id.save_button);
 		saveBtn.setOnClickListener(saveButtonListener);
@@ -139,7 +157,7 @@ public class RRCaptureConfirmActivity extends Activity {
 				imgView.setImageBitmap(newBmp);
 				mCapturedBmp = null;
 				mCapturedBmp = newBmp;
-				
+
 				imgView.invalidate();
 			}
 		};
@@ -151,21 +169,35 @@ public class RRCaptureConfirmActivity extends Activity {
 		saveBtn.setFocusable(true);
 		saveBtn.requestFocus();
 
+		/*
+		 * Request auto saving
+		 */
+		requestAutoSaving();
 	}
 
 	/** Save captured receipt to db */
 	private boolean saveCapturedReceiptToDb(String capturedFile) {
 
 		/** Prepare image file */
-		prepareSavingDirectoryIfNotExists();
-		String newFilePath = generateUniqueReceiptImagePath("");
-		
+		String newFilePath = null;
+		if (mSavedFilePath == null)
+			newFilePath = generateUniqueReceiptImagePath("");
+		else
+			newFilePath = mSavedFilePath;
+
 		try {
-			FileOutputStream ostm = new FileOutputStream(newFilePath);
-			mCapturedBmp.compress(CompressFormat.JPEG, 85, ostm);
+			// FileOutputStream ostm = new FileOutputStream(newFilePath);
+			// FileOutputStream ostm = this.openFileOutput(newFilePath,
+			// MODE_WORLD_READABLE);
+			FileOutputStream ostm = RRUtil.openFileOutputStream(this,
+					newFilePath);
+			if (null == ostm) {
+				return false;
+			}
+			mCapturedBmp.compress(CompressFormat.JPEG, 65, ostm);
 			ostm.flush();
 			ostm.close();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			Log.e(TAG, "Unable to save captured image to file");
 			return false;
@@ -180,40 +212,51 @@ public class RRCaptureConfirmActivity extends Activity {
 		}
 
 		/** Add a row */
-		long rowId = mDbAdapter.insertReceipt(newFilePath,
-				newSmallImageFilePath);
-		if (rowId == -1) {
+		if(mSavedId == -1) {
+			mSavedId = mDbAdapter.insertReceipt(newFilePath,
+					newSmallImageFilePath);
+		} else {
+			if(mDbAdapter.updateExpenseFilePath(mSavedId, newFilePath, newSmallImageFilePath))
+				return false;
+		}
+		
+		if(mSavedId == -1) {
 			Log.e(TAG, "Unable to save receipt image data to db");
 			new File(newFilePath).delete();
+			new File(newSmallImageFilePath).delete();
 			return false;
+			
 		}
+		
+		mSavedFilePath = newFilePath;
+		mSavedSmallFilePath = newSmallImageFilePath;
 
 		return true;
 	}
 
-	/** Prepare saving directory */
-	private boolean prepareSavingDirectoryIfNotExists() {
-		File file = this.getFileStreamPath(RECEIPT_SAVING_FOLDER_NAME);
-		if (true == file.exists()) {
-			return true;
+	/*
+	 * Request auto saving
+	 */
+	private void requestAutoSaving() {
+		if (mAutoSavingTask == null) {
+			mAutoSavingTask = new Runnable() {
+				@Override
+				public void run() {
+					RRCaptureConfirmActivity.this
+							.saveCapturedReceiptToDb(RRCaptureConfirmActivity.this.mCapturedFile);
+					mHandler.removeCallbacks(mAutoSavingTask);
+				}
+			};
 		}
-
-		Log
-				.v(TAG,
-						"Receipt saving folder does not exist. Let's make directory");
-		if (false == file.mkdir()) {
-			Log.e(TAG, "Unable to create receipts folder");
-			return false;
+		if (mAutoSavingTask != null) {
+			mHandler.removeCallbacks(mAutoSavingTask);
+			mHandler.post(mAutoSavingTask);
 		}
-
-		Log.v(TAG, "Succeed to make receipt saving directory:"
-				+ file.getAbsolutePath());
-		return true;
 	}
 
 	/** Generate file path */
 	private String generateUniqueReceiptImagePath(String prefix) {
-		File receiptDir = this.getFileStreamPath(RECEIPT_SAVING_FOLDER_NAME);
+		File receiptDir = mImgStg.getPhotoFolder();
 		String absPath = receiptDir.getAbsolutePath();
 
 		String dateString = RRUtil.getTodayDateString();
@@ -250,20 +293,19 @@ public class RRCaptureConfirmActivity extends Activity {
 	}
 
 	private void showSaveSuccessMessageAndFinishActivity() {
-/*
-		final Activity self = this;*/
+		/*
+		 * final Activity self = this;
+		 */
 
 		/** Show message box */
-		/*Dialog dlg = new AlertDialog.Builder(this).setIcon(
-				R.drawable.alert_dialog_icon).setTitle(
-				R.string.db_insertion_success_dialog_title).setPositiveButton(
-				R.string.ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						 User clicked OK so do some stuff 
-						self.finish();
-					}
-				}).create();
-		dlg.show();*/
+		/*
+		 * Dialog dlg = new AlertDialog.Builder(this).setIcon(
+		 * R.drawable.alert_dialog_icon).setTitle(
+		 * R.string.db_insertion_success_dialog_title).setPositiveButton(
+		 * R.string.ok, new DialogInterface.OnClickListener() { public void
+		 * onClick(DialogInterface dialog, int whichButton) { User clicked OK so
+		 * do some stuff self.finish(); } }).create(); dlg.show();
+		 */
 	}
 
 	/**
@@ -304,7 +346,11 @@ public class RRCaptureConfirmActivity extends Activity {
 		}
 
 		/** Save small image */
-		String smallImagePath = generateUniqueReceiptImagePath("small-");
+		String smallImagePath;
+		if(mSavedSmallFilePath == null)
+			smallImagePath = generateUniqueReceiptImagePath("small-");
+		else
+			smallImagePath = mSavedSmallFilePath;
 
 		try {
 			FileOutputStream ostm = new FileOutputStream(smallImagePath);
@@ -338,7 +384,8 @@ public class RRCaptureConfirmActivity extends Activity {
 	private Bitmap rotateBitmap(Bitmap bmp, int angle) {
 		Matrix m = new Matrix();
 		m.postRotate(angle);
-		Bitmap newBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), m, false);
+		Bitmap newBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp
+				.getHeight(), m, false);
 		return newBmp;
 	}
 }

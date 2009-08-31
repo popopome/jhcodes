@@ -23,6 +23,9 @@ import android.widget.Toast;
 public class RRCameraPreview extends SurfaceView implements
 		SurfaceHolder.Callback {
 
+	private static final int CAPTURE_IMAGE_WIDTH	= 640;
+	private static final int CAPTURE_IMAGE_HEIGHT	= 480;
+	
 	private static final String TAG = "RRCameraPreview";
 
 	/**
@@ -77,10 +80,9 @@ public class RRCameraPreview extends SurfaceView implements
 
 			mCamera.setPreviewDisplay(holder);
 
-			/* 800x600 photo */
 			Camera.Parameters params = mCamera.getParameters();
 			params.setPictureFormat(PixelFormat.RGB_565);
-			params.setPictureSize(800, 600);
+			params.setPictureSize(CAPTURE_IMAGE_WIDTH, CAPTURE_IMAGE_HEIGHT);
 			mCamera.setParameters(params);
 		} catch (Exception e) {
 			Log.e(TAG, "Unable to prepare camera");

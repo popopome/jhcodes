@@ -164,6 +164,18 @@ public class RRDbAdapter {
 
 		return mDb.insert(TABLE_RECEIPT, null, vals);
 	}
+	
+	public boolean updateExpenseFilePath(long id, String imagePath, String smallImagePath) {
+		ContentValues vals = new ContentValues();
+		vals.put(KEY_RECEIPT_IMG_FILE, imagePath);
+		vals.put(KEY_RECEIPT_SMALL_IMG_FILE, smallImagePath);
+
+		int rowCnt = mDb.update(TABLE_RECEIPT, vals, "_id=" + id, null);
+		if(rowCnt != 1)
+			return true;
+		
+		return false;
+	}
 
 	/*
 	 * Delete expense

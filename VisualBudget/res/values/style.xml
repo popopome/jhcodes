@@ -24,7 +24,7 @@
 	</style>
 	<style name="Widget.TextView.GuideTitle" parent="android:Widget.TextView">
 		<item name="android:textColor">#ffffffff</item>
-		<item name="android:shadowColor">#88000000</item>
+		<item name="android:shadowColor">#ff000000</item>
 		<item name="android:shadowRadius">2.0</item>
 		<item name="android:textSize">22.0sp</item>
 	</style>
@@ -35,6 +35,12 @@
 		<item name="android:textSize">20.0sp</item>
 		<item name="android:paddingLeft">5sp</item>
 		<item name="android:paddingRight">5sp</item>
+	</style>
+	<style name="Widget.TextView.CalendarTitle" parent="android:Widget.TextView">
+		<item name="android:textColor">#ffffffff</item>
+		<item name="android:shadowColor">#ff000000</item>
+		<item name="android:shadowRadius">2.0</item>
+		<item name="android:textSize">26.0sp</item>
 	</style>
 	<style name="Widget.TextView.ContentText" parent="android:Widget.TextView">
 		<item name="android:textSize">20.0sp</item>

@@ -18,24 +18,20 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.jhlee.vbudget.R;
+import com.jhlee.vbudget.util.RRUtil;
 
 public class RRTakeReceiptActivity extends Activity implements RRCameraPreview.OnPictureTakenListener {
 	
 	private static final String TAG = "RRTakeShot";
 	
-	private RRImageStorageManager	mImgStg = new RRImageStorageManager();
+	private RRImageStorageManager	mImgStg;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		/* Check whether storage is available or not */
-		if(false == mImgStg.open(this)) {
-			Log.e(TAG, "unable to open image storage");
-			Toast.makeText(this, "Please insert sd card first", Toast.LENGTH_LONG).show();
-			this.finish();
-			return;
-		}
+		
 		
 		/* Screen orientation to landscape */
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -63,6 +59,27 @@ public class RRTakeReceiptActivity extends Activity implements RRCameraPreview.O
 
 	}
 
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if(mImgStg != null)
+			return;
+		
+		mImgStg = new RRImageStorageManager();
+		/* Check whether storage is available or not */
+		if(false == mImgStg.open(this)) {
+			Log.e(TAG, "unable to open image storage");
+			Toast.makeText(this, "Please insert sd card first", Toast.LENGTH_LONG).show();
+			this.finish();
+			return;
+		}
+		
+		
+	}
+
+
 	/**
 	 * Picture is taken
 	 */
@@ -84,10 +101,16 @@ public class RRTakeReceiptActivity extends Activity implements RRCameraPreview.O
 		try {
 			/* Create new file */
 			/* outputFile.createNewFile();*/
-			/*FileOutputStream stm = new FileOutputStream(outputFile.getAbsolutePath());*/
+//			FileOutputStream stm = new FileOutputStream(outputFile.getAbsolutePath());
 			
-			FileOutputStream stm = this.openFileOutput(TEMP_FILE_NAME, MODE_PRIVATE);
-			saveResult = bmp.compress(CompressFormat.JPEG, 85, stm);			
+//			FileOutputStream stm = this.openFileOutput(TEMP_FILE_NAME, MODE_WORLD_READABLE);
+//			FileOutputStream stm = this.openFileOutput(outputFile.getAbsolutePath(), MODE_WORLD_READABLE);
+			FileOutputStream stm = RRUtil.openFileOutputStream(this, outputFile.getAbsolutePath());
+			if(null == stm) {
+				this.finish();
+				return;
+			}
+			saveResult = bmp.compress(CompressFormat.JPEG, 100, stm);			
 			stm.flush();
 			stm.close();
 			
@@ -116,7 +139,7 @@ public class RRTakeReceiptActivity extends Activity implements RRCameraPreview.O
 		i.putExtra("PARAM_IMAGE_FILE", absPath);
 		
 		this.startActivity(i);
-		this.finish();
+//		this.finish();
 		
 	}
 
