@@ -55,7 +55,10 @@ public class RRStatisticsView extends FrameLayout implements RRBudgetContent {
 
 	}
 
-
+	@Override
+	public void onViewResumed() {
+	}
+	
 	/**
 	 * Create day-by-day expense graph
 	 * 

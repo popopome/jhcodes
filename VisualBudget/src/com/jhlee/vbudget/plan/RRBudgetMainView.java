@@ -119,6 +119,10 @@ public class RRBudgetMainView extends LinearLayout implements RRBudgetContent {
 		return li.inflate(layoutId, parent, true);
 	}
 
+	@Override
+	public void onViewResumed() {
+	}
+	
 	/*
 	 * Refresh content data
 	 */

@@ -138,6 +138,11 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 		});
 	}
 
+	
+	@Override
+	public void onViewResumed() {
+	}
+
 	@Override
 	public void createMenu(Menu menu, MenuInflater inflater) {
 		menu.add(0, 0, 0, "About");

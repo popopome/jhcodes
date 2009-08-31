@@ -35,12 +35,15 @@ import android.widget.TextView;
 
 import com.jhlee.vbudget.R;
 import com.jhlee.vbudget.RRBudgetContent;
+import com.jhlee.vbudget.collect.RRTakeReceiptActivity;
+import com.jhlee.vbudget.collect.RRTransactionEditDialog;
 import com.jhlee.vbudget.db.RRDbAdapter;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.OnCarouselActiveItemChanged;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.OnCarouselActiveItemClickListener;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.OnCarouselItemCustomDrawListener;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.OnCarouselScrollEventListener;
 import com.jhlee.vbudget.expense.RRCarouselFlowView.RRCarouselItem;
+import com.jhlee.vbudget.overview.RRMoneyOverview;
 import com.jhlee.vbudget.plan.RRBudgetSelectDialog;
 import com.jhlee.vbudget.tags.RRTagDataProviderFromDb;
 import com.jhlee.vbudget.tags.RRTagSelectDialog;
@@ -215,8 +218,8 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	 */
 	private void deleteActiveItem() {
 		long id = getActiveReceiptId();
-		RRCarouselItem item = mCarouselView.getActiveItem();
-		int oldSeq = item.seq;
+//		RRCarouselItem item = mCarouselView.getActiveItem();
+//		int oldSeq = item.seq;
 
 		/* Delete data from Db */
 		if (false == mAdapter.deleteExpense(id)) {
@@ -229,13 +232,13 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		 */
 		refreshContent();
 
-		int cnt = mCursor.getCount();
-		if (cnt <= oldSeq) {
-			oldSeq = cnt - 1;
-		}
-
-		if (oldSeq >= 0)
-			mCarouselView.setActiveItem(oldSeq);
+//		int cnt = mCursor.getCount();
+//		if (cnt <= oldSeq) {
+//			oldSeq = cnt - 1;
+//		}
+//
+//		if (oldSeq >= 0)
+//			mCarouselView.setActiveItem(oldSeq);
 
 		/*
 		 * Check data existence
@@ -244,6 +247,8 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 
 		invalidate();
 	}
+	
+	
 
 	// private void initializeBudgetButton() {
 	// mBudgetButton.setOnClickListener(new View.OnClickListener() {
@@ -561,8 +566,13 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 	}
 
 	@Override
+	public void onViewResumed() {
+		refreshContent();
+	}
+	
+	@Override
 	public void createMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.menu_detail_view, menu);
+		inflater.inflate(R.menu.menu_expense_view, menu);
 	}
 
 	/*
@@ -588,9 +598,70 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 		case R.id.menu_tag:
 			changeTagWithUser();
 			break;
+		case R.id.new_capture:
+			/* Launch capture activity */
+			Context ctx = this.getContext();
+			Intent i = new Intent(ctx, RRTakeReceiptActivity.class);
+			ctx.startActivity(i);
+			break;
+		case R.id.new_expense:
+			newExpense();
+			break;
 		}
 	}
 
+	/* Transaction button is clicked */
+	private void newExpense() {
+		final RRTransactionEditDialog dlg = new RRTransactionEditDialog(this.getContext());
+		dlg.initialize(mAdapter);
+
+		dlg
+				.setOnDismissListener(new DialogInterface.OnDismissListener() {
+					@Override
+					public void onDismiss(DialogInterface dialog) {
+						/* Dialog is closed */
+						if (dlg.isCanceled())
+							return;
+
+						long transId = mAdapter.newTransaction();
+						if (-1 == transId) {
+							Log.e(TAG,
+									"Unable to create new transaction");
+							return;
+						}
+
+						/* Read-only tag list */
+						Iterator<String> it = dlg.getTaglistIterator();
+						while (it.hasNext()) {
+							mAdapter.addTagToReceipt(transId, it
+									.next());
+						}
+						long money = dlg.getExpenseAmount();
+						mAdapter.updateExpenseAmount(transId,
+								(int) money / 100, (int) money % 100);
+						
+						/* Refresh view
+						 * 
+						 */
+						RRDailyExpenseCarouselView.this.refreshContent();
+						mCarouselView.invalidate();
+
+						/* Apply budget field */
+						long budgetId = dlg.getSelectedBudgetId();
+						if (-1 == budgetId)
+							return;
+
+						mAdapter.makeTransactionFromBudget(transId,
+								money, budgetId);
+						
+						
+						
+					}
+				});
+
+		dlg.show();
+	}
+	
 	private void changeTagWithUser() {
 		/* Set active receipt id */
 		mTagDataProvider.setActiveReceiptId(getActiveReceiptId());

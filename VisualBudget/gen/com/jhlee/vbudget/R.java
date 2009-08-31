@@ -153,6 +153,8 @@ public final class R {
         public static final int money_view=0x7f08002a;
         public static final int month_budget_view=0x7f08003e;
         public static final int move_to_today=0x7f080002;
+        public static final int new_capture=0x7f080067;
+        public static final int new_expense=0x7f080068;
         public static final int numpad=0x7f080051;
         public static final int ok_button=0x7f080042;
         public static final int receipt_detail_layout=0x7f080024;
@@ -213,6 +215,7 @@ public final class R {
     }
     public static final class menu {
         public static final int menu_detail_view=0x7f070000;
+        public static final int menu_expense_view=0x7f070001;
     }
     public static final class string {
         public static final int app_name=0x7f040001;

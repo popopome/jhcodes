@@ -130,6 +130,7 @@ public class RRCaptureConfirmActivity extends Activity {
 					// Toast.LENGTH_SHORT).show();
 				}
 				// self.startCameraActivity();
+				self.finish();
 			}
 		};
 		Button saveBtn = (Button) findViewById(R.id.save_button);
@@ -141,7 +142,8 @@ public class RRCaptureConfirmActivity extends Activity {
 				/*
 				 * Do not any thing. Just launch camera activity again.
 				 */
-				self.startCameraActivity();
+				
+				self.finish();
 			}
 		};
 		Button deleteBtn = (Button) findViewById(R.id.delete_button);
@@ -367,14 +369,14 @@ public class RRCaptureConfirmActivity extends Activity {
 		return smallImagePath;
 	}
 
-	/**
-	 * Start camera activity
-	 */
-	private void startCameraActivity() {
-		Intent i = new Intent(this, RRTakeReceiptActivity.class);
-		this.startActivity(i);
-		this.finish();
-	}
+//	/**
+//	 * Start camera activity
+//	 */
+//	private void startCameraActivity() {
+//		Intent i = new Intent(this, RRTakeReceiptActivity.class);
+//		this.startActivity(i);
+//		this.finish();
+//	}
 
 	/**
 	 * Rotate image view

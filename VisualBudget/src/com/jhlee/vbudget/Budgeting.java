@@ -133,6 +133,22 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 		return view;
 	}
 
+
+	/*
+	 * Resumed
+	 */
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if(mTabHost != null) {
+			RRBudgetContent content = (RRBudgetContent) mTabHost.getCurrentView();
+			if(content != null) {
+				content.onViewResumed();
+			}
+		}
+	}
+
 	private View findContentView(String tabId) {
 		/* Find view */
 		FrameLayout frame = mTabHost.getTabContentView();
