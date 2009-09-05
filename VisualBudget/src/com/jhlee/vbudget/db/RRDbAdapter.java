@@ -119,6 +119,10 @@ public class RRDbAdapter {
 	private static final long TAG_STRING_FORMAT_MULTI_LINE = 1;
 	private static final long TAG_STRING_FORMAT_COMMA_SEP = 2;
 	private static final long NULL_BALANCE = 0x7FFFFFFF;
+
+	private static final String EMPTY_IMG_FILE_NAME = "NT";
+	private static final String EMPTY_SMALL_IMG_FILE_NAME = "NTS";
+
 	public static final long NULL_BUDGET_ID = -1;
 
 	private DbHelper mDbHelper;
@@ -164,16 +168,17 @@ public class RRDbAdapter {
 
 		return mDb.insert(TABLE_RECEIPT, null, vals);
 	}
-	
-	public boolean updateExpenseFilePath(long id, String imagePath, String smallImagePath) {
+
+	public boolean updateExpenseFilePath(long id, String imagePath,
+			String smallImagePath) {
 		ContentValues vals = new ContentValues();
 		vals.put(KEY_RECEIPT_IMG_FILE, imagePath);
 		vals.put(KEY_RECEIPT_SMALL_IMG_FILE, smallImagePath);
 
 		int rowCnt = mDb.update(TABLE_RECEIPT, vals, "_id=" + id, null);
-		if(rowCnt != 1)
+		if (rowCnt != 1)
 			return true;
-		
+
 		return false;
 	}
 
@@ -199,6 +204,17 @@ public class RRDbAdapter {
 		}
 
 		/*
+		 * Delete image files
+		 */
+		String filePath = c.getString(c.getColumnIndex(KEY_RECEIPT_IMG_FILE));
+		String smallFilePath = c.getString(c
+				.getColumnIndex(KEY_RECEIPT_SMALL_IMG_FILE));
+		if (filePath.compareTo(EMPTY_IMG_FILE_NAME) != 0)
+			RRUtil.deleteFile(filePath);
+		if (smallFilePath.compareTo(EMPTY_SMALL_IMG_FILE_NAME) != 0)
+			RRUtil.deleteFile(smallFilePath);
+
+		/*
 		 * Delete data from table
 		 */
 		int cnt = mDb.delete(TABLE_RECEIPT, "_id=" + id, null);
@@ -209,7 +225,7 @@ public class RRDbAdapter {
 	}
 
 	public long newTransaction() {
-		return insertReceipt("NT", "NTS");
+		return insertReceipt(EMPTY_IMG_FILE_NAME, EMPTY_SMALL_IMG_FILE_NAME);
 	}
 
 	/** Query receipt by daily */
@@ -234,9 +250,11 @@ public class RRDbAdapter {
 	 * @return
 	 */
 	public Cursor queryReceipt(long transId) {
-		Cursor c = mDb.query("receipt LEFT OUTER JOIN budget ON receipt.budget_id=budget._id",
-				new String[] { "*", "budget.budget_name as budget_name" }, "receipt._id=" + transId, null, null,
-				null, null);
+		Cursor c = mDb
+				.query(
+						"receipt LEFT OUTER JOIN budget ON receipt.budget_id=budget._id",
+						new String[] { "*", "budget.budget_name as budget_name" },
+						"receipt._id=" + transId, null, null, null, null);
 		if (c != null) {
 			c.moveToFirst();
 			mOwnerActivity.startManagingCursor(c);
@@ -289,24 +307,24 @@ public class RRDbAdapter {
 	public void updateExpenseAmount(long rid, int dollars, int cents) {
 		/* Let's update budget amount */
 		Cursor c = queryReceipt(rid);
-		if(c.getCount() != 1) {
-			Log.e(TAG, "Not found expense data:id="+rid);
+		if (c.getCount() != 1) {
+			Log.e(TAG, "Not found expense data:id=" + rid);
 			return;
 		}
-		
+
 		long newTotal = dollars * 100 + cents;
-		
+
 		/*
-		 * If expense alreadyf have budget id,
-		 * then we make changes for budget amount.
+		 * If expense alreadyf have budget id, then we make changes for budget
+		 * amount.
 		 */
 		long oldTotal = c.getLong(c.getColumnIndex(KEY_RECEIPT_TOTAL));
 		int budgetIdColIndex = c.getColumnIndex(KEY_RECEIPT_BUDGET_ID);
-		if(false == c.isNull(budgetIdColIndex)) {
-			if(budgetIdColIndex != NULL_BUDGET_ID) {
+		if (false == c.isNull(budgetIdColIndex)) {
+			if (budgetIdColIndex != NULL_BUDGET_ID) {
 				/* There is budget id */
 				int budgetId = c.getInt(budgetIdColIndex);
-				
+
 				/* Update budget balance */
 				long delta = newTotal - oldTotal;
 				long budgetBalance = queryBudgetBalance(budgetId);
@@ -314,7 +332,7 @@ public class RRDbAdapter {
 				updateBudgetBalance(budgetId, budgetBalance);
 			}
 		}
-		
+
 		ContentValues vals = new ContentValues();
 		vals.put(KEY_RECEIPT_TOTAL, newTotal);
 		int numRows = mDb.update(TABLE_RECEIPT, vals, "_id="
@@ -665,16 +683,17 @@ public class RRDbAdapter {
 			Log.e(LOG, "Unable to delete budget");
 			return false;
 		}
-		
+
 		/* Let's update expenses which uses this budget item */
 		ContentValues val = new ContentValues();
-		Cursor c = mDb.query(TABLE_RECEIPT, new String[]{"_id"}, "budget_id="+id, null, null, null, null);
+		Cursor c = mDb.query(TABLE_RECEIPT, new String[] { "_id" },
+				"budget_id=" + id, null, null, null, null);
 		int cnt = c.getCount();
-		if(cnt < 1)
+		if (cnt < 1)
 			return true;
-		
+
 		c.moveToFirst();
-		while(c.isAfterLast() == false) {
+		while (c.isAfterLast() == false) {
 			int transId = c.getInt(0);
 			updateTransactionBudget(transId, NULL_BUDGET_ID);
 			c.moveToNext();
@@ -688,19 +707,19 @@ public class RRDbAdapter {
 	 */
 	public boolean updateBudgetItem(int year, int month, String budgetName,
 			long budgetAmount) {
-		
+
 		int budgetId = (int) findBudgetItem(year, month, budgetName);
-		if(-1 == budgetId)
+		if (-1 == budgetId)
 			return false;
-		
+
 		Cursor c = queryBudgetItem(budgetId);
-		if(c.getCount() != 1)
+		if (c.getCount() != 1)
 			return false;
-		
+
 		long oldAmount = c.getLong(COL_BUDGET_AMOUNT);
 		long oldBalance = c.getLong(COL_BUDGET_BALANCE);
 		long expenses = oldAmount - oldBalance;
-		
+
 		ContentValues vals = new ContentValues();
 		vals.put("budget_name", budgetName);
 		vals.put("budget_amount", budgetAmount);
@@ -831,16 +850,16 @@ public class RRDbAdapter {
 		Cursor c = queryBudgetItem(budgetId);
 		if (c.getCount() == 0)
 			return NULL_BALANCE;
-		
+
 		long balance = c.getLong(COL_BUDGET_BALANCE);
 		c.close();
 		return balance;
 	}
 
 	private Cursor queryBudgetItem(long budgetId) {
-		Cursor c = mDb.query(TABLE_BUDGET, null,
-				"_id=" + budgetId, null, null, null, null);
-		c.moveToFirst();	
+		Cursor c = mDb.query(TABLE_BUDGET, null, "_id=" + budgetId, null, null,
+				null, null);
+		c.moveToFirst();
 		return c;
 	}
 

@@ -1,5 +1,6 @@
 package com.jhlee.vbudget.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -111,5 +112,22 @@ public class RRUtil {
 		}
 		
 		return stm;
+	}
+	
+	public static boolean deleteFile(String filePath) {
+		try {
+			File f = new File(filePath);
+			if(f.exists()) {
+				if(false == f.delete()) {
+					Log.e(TAG, "Unable to delete file:filePath=" + filePath);
+					return false;
+				}
+			}
+			
+		} catch(Exception e) {
+			Log.e(TAG, "Unable to delete file:filePath=" + filePath);
+			return false;
+		}
+		return true;
 	}
 }

@@ -80,7 +80,8 @@ public class RRChartYAxisView extends View {
 	protected void onDraw(Canvas canvas) {
 		Paint p = mPaint;
 		p.setStrokeWidth(AXIS_STROKE_WIDTH);
-		p.setColor(mLineColor);
+//		p.setColor(mLineColor);
+		p.setColor(RRChartBarView.GREEN_BAR_EDGE_COLOR);
 		p.setStyle(Paint.Style.STROKE);
 		
 		int vh = getHeight();

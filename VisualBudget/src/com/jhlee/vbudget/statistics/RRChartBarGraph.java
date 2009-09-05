@@ -99,15 +99,31 @@ public class RRChartBarGraph extends RelativeLayout {
 		mBarStreamView.setTitleTextSize(textSize);
 	}
 
+	
+	/*
+	 * Update data provider
+	 */
 	public void setChartBarDataProvider(RRChartBarDataProvider dataProvider) {
 		mDataProvider = dataProvider;
 		mBarStreamView.setChartBarDataProvider(dataProvider);
+		
+		updateGraphVisibilityStatusByDataExistence();
+		
+		requestLayout();
+	}
+
+	/*
+	 * Update graph visibility
+	 */
+	private void updateGraphVisibilityStatusByDataExistence() {
+		if(mDataProvider != null)
+			return;
 		
 		/*
 		 * Check if there is no data,
 		 * we only show empty data
 		 */
-		if(dataProvider.getCount() == 0) {
+		if(mDataProvider.getCount() == 0) {
 			mGraphWrapper.setVisibility(View.GONE);
 			mTitleView.setVisibility(View.GONE);
 			mEmptyView.setVisibility(View.VISIBLE);
@@ -116,8 +132,6 @@ public class RRChartBarGraph extends RelativeLayout {
 			mTitleView.setVisibility(View.VISIBLE);
 			mEmptyView.setVisibility(View.GONE);
 		}
-		
-		requestLayout();
 	}
 
 	/*

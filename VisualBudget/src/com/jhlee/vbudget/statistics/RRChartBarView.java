@@ -15,8 +15,12 @@ public class RRChartBarView extends View {
 	private static final int DEFAULT_TEXT_SIZE = 17;
 	private static final float DEFAULT_LINE_STROKE_WIDTH = 1.5f;
 
-	private int mBarFillColor = Color.LTGRAY;
-	private int mBarEdgeColor = Color.DKGRAY;
+	public static final int GREEN_BAR_FILL_COLOR = Color.rgb(137, 202, 168);
+	public static final int GREEN_BAR_EDGE_COLOR = Color.rgb(92, 183, 139);
+	
+
+	private int mBarFillColor = GREEN_BAR_FILL_COLOR;
+	private int mBarEdgeColor = GREEN_BAR_EDGE_COLOR;
 	private int mBarTitleColor = Color.WHITE;
 
 	private Paint mPaint;
@@ -157,7 +161,7 @@ public class RRChartBarView extends View {
 	}
 
 	public void setBarColor(int barColor, int barEdgeColor) {
-		mBarFillColor = barColor;
-		mBarEdgeColor = barEdgeColor;
+//		mBarFillColor = barColor;
+//		mBarEdgeColor = barEdgeColor;
 	}
 }

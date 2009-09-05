@@ -495,7 +495,9 @@ public class RRDailyExpenseCarouselView extends FrameLayout implements
 			int newSeq = Math.min(oldSeq, numOfReceipts - 1);
 			carouselView.setActiveItem(newSeq);
 		} else {
-			carouselView.setActiveItem(numOfReceipts - 1);
+			if(numOfReceipts>0) {
+				carouselView.setActiveItem(numOfReceipts - 1);
+			}
 		}
 
 		/*

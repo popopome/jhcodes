@@ -161,7 +161,7 @@ public class RRChartBarStreamView extends Gallery {
 		super.onDraw(canvas);
 		Paint p = mPaint;
 		p.setStyle(Paint.Style.STROKE);
-		p.setColor(Color.DKGRAY);
+		p.setColor(RRChartBarView.GREEN_BAR_EDGE_COLOR);
 		p.setAntiAlias(true);
 		p.setStrokeWidth(BASE_LINE_WIDTH);
 		
@@ -178,5 +178,7 @@ public class RRChartBarStreamView extends Gallery {
 //		setChartBarDataProvider(mDataProvider);
 		ChartBarDataAdapter adapter = (ChartBarDataAdapter)getAdapter();
 		adapter.notifyDataSetChanged();
+		
+		
 	}
 }

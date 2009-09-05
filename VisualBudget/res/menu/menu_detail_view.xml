@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
-
-	<item android:id="@+id/menu_budget" android:title="Select budget"
-		android:icon="@drawable/icon_budget" />
-	<item android:id="@+id/menu_tag" android:title="Select tag"
-		android:icon="@drawable/icon_tag" />
-	<item android:id="@+id/menu_date" android:title="Change date"
-		android:icon="@drawable/icon_date" />
-	<item android:id="@+id/menu_amount" android:title="Change amount"
+	<item android:id="@+id/menu_amount" android:title="Expense Amount"
 		android:icon="@drawable/icon_amount" />
-
-
+	<item android:id="@+id/menu_budget" android:title="Budget"
+		android:icon="@drawable/icon_budget" />
+	<item android:id="@+id/menu_tag" android:title="Tag"
+		android:icon="@drawable/icon_tag" />
+	<item android:id="@+id/menu_date" android:title="Date"
+		android:icon="@drawable/icon_date" />
 </menu>

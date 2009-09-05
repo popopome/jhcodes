@@ -647,6 +647,9 @@ public class RRCarouselFlowView extends View {
 	 * Set active tiem
 	 */
 	public void setActiveItem(int itemSeq) {
+		if(mSortedItems == null)
+			return;
+		
 		this.moveCamera(itemSeq * mItemWidth);
 
 		int newSeq = mSortedItems.get(mSortedItems.size() - 1).seq;

@@ -70,6 +70,7 @@ public class RRCaptureConfirmActivity extends Activity {
 
 		/** Initialize db adapter */
 		mDbAdapter = new RRDbAdapter(this);
+		mDbAdapter.setOwner(this);
 
 		/** Get passed file path from bundle */
 		Intent i = getIntent();
@@ -140,11 +141,22 @@ public class RRCaptureConfirmActivity extends Activity {
 		Button.OnClickListener deleteBtnListener = new Button.OnClickListener() {
 			public void onClick(View v) {
 				/*
+				 * Here actually delete data if data is already inserted
+				 */
+				if(mSavedId != -1) {
+					mDbAdapter.deleteExpense(mSavedId);
+					mSavedId = -1;
+					mSavedFilePath = null;
+					mSavedSmallFilePath = null;
+				}
+				
+				/*
 				 * Do not any thing. Just launch camera activity again.
 				 */
-				
 				self.finish();
 			}
+
+			
 		};
 		Button deleteBtn = (Button) findViewById(R.id.delete_button);
 		deleteBtn.setOnClickListener(deleteBtnListener);

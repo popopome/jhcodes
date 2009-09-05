@@ -156,7 +156,7 @@ public class RRMoneyOverview extends FrameLayout implements RRBudgetContent {
 		new AlertDialog.Builder(this.getContext())
 				.setTitle("Budgeting...")
 				.setMessage(
-						"Money is one of critical part of my life and also your life. Why don't you control your money flow? Here is great way to manage your precious money - Budgeting. Mobile camera is perfect way to capture your expenses at any time. Camera and budgeting is best discipline for being financial freebie.")
+						"KingsWay Mobile\nVer.0.1\n\nMoney is one of critical part of my life and also your life. Why don't you control your money flow? Here is great way to manage your precious money - Budgeting. Mobile camera is perfect way to capture your expenses at any time. Camera and budgeting is best discipline for being financial freebie.")
 				.setPositiveButton("OK",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
