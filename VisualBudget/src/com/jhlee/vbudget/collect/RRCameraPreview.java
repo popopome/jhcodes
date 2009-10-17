@@ -7,6 +7,7 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
 import android.hardware.Camera;
+import android.hardware.Camera.AutoFocusCallback;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -39,6 +40,7 @@ public class RRCameraPreview extends SurfaceView implements
 
 	private SurfaceHolder mHolder;
 	private Camera mCamera;
+	private OnPictureTakenListener mEventListener;
 
 	/** CTOR */
 	public RRCameraPreview(Context context, AttributeSet attrs, int defStyle) {
@@ -68,6 +70,10 @@ public class RRCameraPreview extends SurfaceView implements
 		mHolder.addCallback(this);
 		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
+	}
+	
+	public void setCaptureEventListener(OnPictureTakenListener listener) {
+		mEventListener = listener;
 	}
 
 	/**
@@ -132,8 +138,7 @@ public class RRCameraPreview extends SurfaceView implements
 	/**
 	 * Take a picture from camera
 	 */
-	public void takePicture(OnPictureTakenListener listener) {
-		final OnPictureTakenListener listenerFinal = listener;
+	public void takePicture() {
 		Camera.PictureCallback pictureCallback = new Camera.PictureCallback() {
 			/* We expect data is jpeg byte stream. */
 			public void onPictureTaken(byte[] data, Camera camera) {
@@ -157,14 +162,35 @@ public class RRCameraPreview extends SurfaceView implements
 					bmp = null;
 					bmp = resized;
 				}
-				
-				listenerFinal.pictureTaken(bmp);
+		
+				RRCameraPreview.this.mEventListener.pictureTaken(bmp);
 				bmp = null;
 				System.gc();
 			}
 		};
 
 		mCamera.takePicture(null, null, pictureCallback);
+	}
+	
+	/*
+	 * Start camera's auto-focus.
+	 * jhlee.
+	 */
+	public void startAutoFocus() {
+		mCamera.autoFocus(new AutoFocusCallback() {
+			@Override
+			public void onAutoFocus(boolean success, Camera camera) {
+				if(success == false) {
+					Log.v(TAG, "AutoFocus is failed");
+					return;
+				}
+				
+				/*
+				 * Let's take a picture
+				 */
+				RRCameraPreview.this.takePicture();
+			}
+		});
 	}
 	
 	

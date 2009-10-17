@@ -9,4 +9,4 @@ public interface RRBudgetContent {
 	public void createMenu(Menu menu, MenuInflater inflater);
 	public void onMenuItemSelected(MenuItem mi);
 	public void onViewResumed();
-}
+} 

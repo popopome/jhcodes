@@ -43,16 +43,25 @@ public class RRTakeReceiptActivity extends Activity implements RRCameraPreview.O
 		
 		/* Get preview object */
 		final RRCameraPreview preview = (RRCameraPreview)findViewById(R.id.rr_cam_preview);
+		preview.setCaptureEventListener(this);
 		
 		/** Register button click callback function */
 		final RRTakeReceiptActivity self = this;
 		Button.OnClickListener btnClickListener = new Button.OnClickListener() {
 			public void onClick(View arg0) {
-				preview.takePicture(self);
+				preview.takePicture();
 			}
 		};
+		
 		Button btnTakeShot = (Button) this.findViewById(R.id.ButtonTakeShot);
 		btnTakeShot.setOnClickListener(btnClickListener);
+		btnTakeShot.setOnLongClickListener(new Button.OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				preview.startAutoFocus();
+				return true;
+			}
+		});
 		
 		/* Give default focus to button */
 		btnTakeShot.requestFocus();

@@ -31,7 +31,7 @@ public class RRUtil {
 	
 	public static String getCurrentYearMonthString() {
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM yyyy");
-		return formatter.format(new Date());
+		return formatter.format(new Date()); 
 	}
 	
 	public static String getCurrentTimeString() {

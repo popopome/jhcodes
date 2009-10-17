@@ -131,8 +131,15 @@ public class RRDbAdapter {
 
 	/** CTOR */
 	public RRDbAdapter(Context ctx) {
-		mDbHelper = new DbHelper(ctx);
-		mDb = mDbHelper.getWritableDatabase();
+		try {
+			mDbHelper = new DbHelper(ctx);
+			mDb = mDbHelper.getWritableDatabase();	
+		} catch(IllegalStateException e) {
+			Log.v(TAG, "Database is not correctly closed<" + e.getMessage() + ">");
+			
+			mDbHelper = null;
+			mDb = null;
+		}
 	}
 
 	/*
