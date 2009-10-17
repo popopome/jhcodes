@@ -3,8 +3,8 @@
 <resources>
     <string name="hello">Hello World, RRWelcome!</string>
     <string name="app_name">Budgeting</string>
-    <string name="version">Ver. 0.1</string>
-    <string name="company">KingsWay Mobile</string>
+    <string name="version">Ver. 0.1.1</string>
+    <string name="company">TapFish</string>
 	<string name="take_shot">Take Shot!</string>
 	<string name="take_other_receipt">Take Other Receipt</string>
 	<string name="ok">Ok</string>
@@ -15,4 +15,5 @@
 	<string name="error">Error</string>
 	<string name="rotate">Rotate</string>
 	<string name="daily">Daily</string>
+	<string name="about_msg">TapFish Software.\nVer.0.1.1\n\nMoney is one of critical part of my life and also your life. Why don't you control your money flow? Here is great way to manage your precious money - Budgeting. Mobile camera is perfect way to capture your expenses at any time. Camera and budgeting is best discipline for being financial freebie.</string>
 </resources>

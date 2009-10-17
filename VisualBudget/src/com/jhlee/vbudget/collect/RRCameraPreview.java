@@ -1,12 +1,11 @@
 package com.jhlee.vbudget.collect;
 
-import java.io.IOException;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.PixelFormat;
+import android.graphics.RectF;
 import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -23,9 +22,9 @@ import android.widget.Toast;
 public class RRCameraPreview extends SurfaceView implements
 		SurfaceHolder.Callback {
 
-	private static final int CAPTURE_IMAGE_WIDTH	= 640;
-	private static final int CAPTURE_IMAGE_HEIGHT	= 480;
-	
+	private static final int CAPTURE_IMAGE_WIDTH = 640;
+	private static final int CAPTURE_IMAGE_HEIGHT = 480;
+
 	private static final String TAG = "RRCameraPreview";
 
 	/**
@@ -86,7 +85,7 @@ public class RRCameraPreview extends SurfaceView implements
 			mCamera.setParameters(params);
 		} catch (Exception e) {
 			Log.e(TAG, "Unable to prepare camera");
-			if(null != mCamera) {
+			if (null != mCamera) {
 				mCamera.release();
 				mCamera = null;
 			}
@@ -99,11 +98,11 @@ public class RRCameraPreview extends SurfaceView implements
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-		if(mCamera == null) {
+		if (mCamera == null) {
 			Log.e(TAG, "Camera is not ready");
 			return;
 		}
-		
+
 		/*
 		 * Now the size is known, set up the camera parameters and begin the
 		 * preview
@@ -115,11 +114,11 @@ public class RRCameraPreview extends SurfaceView implements
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		if(mCamera == null) {
+		if (mCamera == null) {
 			Log.e(TAG, "camer is not ready");
 			return;
 		}
-		
+
 		/*
 		 * Surface will be destroyed when we return, so stop the preview.
 		 * Because the CameraDevice object is not a shared resource, it's very
@@ -138,13 +137,61 @@ public class RRCameraPreview extends SurfaceView implements
 		Camera.PictureCallback pictureCallback = new Camera.PictureCallback() {
 			/* We expect data is jpeg byte stream. */
 			public void onPictureTaken(byte[] data, Camera camera) {
+				/*
+				 * In order to get more free-spaced memory.
+				 */
+				System.gc();
+				
 				Bitmap bmp = BitmapFactory
 						.decodeByteArray(data, 0, data.length);
+				int w = bmp.getWidth();
+				int h = bmp.getHeight();
+				boolean isTooBig = (w > CAPTURE_IMAGE_WIDTH && h > CAPTURE_IMAGE_HEIGHT);
+				if (isTooBig) {
+					/*
+					 * Resize image to fit in our expectation
+					 */
+					Log.v(TAG, "Bitmap is too big:w=" + Integer.toString(w)
+							+ ",h=" + Integer.toString(h));
+					Bitmap resized = resizeBitmapToExpectedSize(bmp);
+					bmp = null;
+					bmp = resized;
+				}
+				
 				listenerFinal.pictureTaken(bmp);
+				bmp = null;
+				System.gc();
 			}
 		};
 
 		mCamera.takePicture(null, null, pictureCallback);
+	}
+	
+	
+	/**
+	 * Resize bitmap to expected size
+	 */
+	public Bitmap resizeBitmapToExpectedSize(Bitmap bmp) {
+		Matrix m = new Matrix();
+		int w = bmp.getWidth();
+		int h = bmp.getHeight();
+		RectF srcRect = new RectF(0, 0, w, h);
+		RectF dstRect = new RectF(0, 0, CAPTURE_IMAGE_WIDTH, CAPTURE_IMAGE_HEIGHT);
+		
+		m.setRectToRect(srcRect, dstRect, Matrix.ScaleToFit.CENTER);
+		m.mapRect(dstRect, srcRect);
+		int dstW = (int) dstRect.width();
+		int dstH = (int) dstRect.height();
+		
+		Log.v(TAG, "Resized bitmap:w<" + Integer.toString(dstW) + ">,h=<" + Integer.toString(dstH) + ">");
+		
+		/*
+		 * Matrix only accept scale.
+		 * Here to resize bitmap I do not need to involve translation factor.
+		 */
+		m.reset();
+		m.postScale(dstW/(float)w, dstH/(float)h);
+		return Bitmap.createBitmap(bmp, 0, 0, w, h, m, true);
 	}
 
 }

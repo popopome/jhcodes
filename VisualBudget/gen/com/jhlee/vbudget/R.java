@@ -211,6 +211,7 @@ public final class R {
         public static final int menu_expense_view=0x7f070001;
     }
     public static final class string {
+        public static final int about_msg=0x7f04000e;
         public static final int app_name=0x7f040001;
         public static final int cancel=0x7f040007;
         public static final int company=0x7f040003;

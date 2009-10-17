@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="com.jhlee.vbudget" android:versionCode="2" android:versionName="1.0.1">
-	<application android:icon="@drawable/icon" android:label="@string/app_name">
+	<application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="true">
 		<!--
 			<activity android:name=".VisualBudget"
 			android:label="@string/app_name"> <intent-filter> <action
@@ -42,4 +42,5 @@
 	</application>
 	<uses-sdk android:minSdkVersion="3" />
 	<uses-permission android:name="android.permission.CAMERA"></uses-permission>
+
 </manifest> 

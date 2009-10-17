@@ -79,18 +79,28 @@ public class RRTakeReceiptActivity extends Activity implements RRCameraPreview.O
 		
 	}
 
-
 	/**
 	 * Picture is taken
 	 */
 	public void pictureTaken(Bitmap capturedBmp) {
 		Log.d(TAG, "Capture image from camera");
+		dumpBitmapInfo(capturedBmp);
 		
 		/* Rotate 90 degree */
 		Matrix m = new Matrix();
 		m.setRotate(90);
-		Bitmap bmp = Bitmap.createBitmap(capturedBmp, 0, 0, capturedBmp.getWidth(),
-				capturedBmp.getHeight(), m, false);
+		Bitmap bmp = null;
+		try {
+			bmp = Bitmap.createBitmap(capturedBmp, 0, 0, capturedBmp.getWidth(),
+				capturedBmp.getHeight(), m, false);	
+		} catch(OutOfMemoryError oom) {
+			/*
+			 *  If bitmap rotation is failed,
+			 *  we just use captured bitmap.
+			 */
+			Toast.makeText(this, "Unable to rotate bitmap", Toast.LENGTH_SHORT);
+			bmp = capturedBmp;
+		}
 		
 		/* Check storage card availability */
 		final String TEMP_FILE_NAME = "temp_capture_image.jpg";
@@ -141,6 +151,15 @@ public class RRTakeReceiptActivity extends Activity implements RRCameraPreview.O
 		this.startActivity(i);
 //		this.finish();
 		
+	}
+
+
+	private void dumpBitmapInfo(Bitmap capturedBmp) {
+		StringBuilder builder = new StringBuilder();
+		builder.append(capturedBmp.getWidth());
+		builder.append(capturedBmp.getHeight());
+		builder.append(capturedBmp.getRowBytes());
+		Log.d(TAG, "Captured image size: " + builder.toString());
 	}
 
 }

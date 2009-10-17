@@ -3,9 +3,7 @@ package com.jhlee.vbudget;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,17 +13,14 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.TabHost.OnTabChangeListener;
-
 import com.jhlee.vbudget.db.RRDbAdapter;
 import com.jhlee.vbudget.expense.RRDailyExpenseCarouselView;
 import com.jhlee.vbudget.overview.RRMoneyOverview;
 import com.jhlee.vbudget.plan.RRBudgetMainView;
 import com.jhlee.vbudget.plan.RRDbBasedBudgetDataProvider;
 import com.jhlee.vbudget.statistics.RRStatisticsView;
-import com.jhlee.vbudget.util.RRUtil;
 
 public class Budgeting extends Activity implements TabHost.TabContentFactory {
-
 	private static final String TAG = "Budgeting";
 	private static final String VIEW_TAG_OVERVIEW = "overview";
 	private static final String VIEW_TAG_EXPENSES = "expenses";
@@ -33,13 +28,18 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 	private static final String VIEW_TAG_STATISTICS = "statistics";
 	private static final String VIEW_TAG_EMPTY_EXPENSES = "empty_expenses";
 
-	/* Db adapter */
+	/*
+	 * Db adapter All database handling is in mDbAdapter.
+	 */
 	private RRDbAdapter mDbAdapter;
-
+	/*
+	 * Tab host
+	 */
 	private TabHost mTabHost;
 
 	/*
-	 * Hold menu
+	 * Hold menu. I build menu at run-time. Its content is changed by current
+	 * view.
 	 */
 	private Menu mMenu;
 
@@ -52,28 +52,33 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 
 		/* No title */
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
+		/* Set layout */
 		this.setContentView(R.layout.budgeting);
 
 		/* Initialize Db */
 		mDbAdapter = new RRDbAdapter(this);
 		mDbAdapter.setOwner(this);
 
+		/*
+		 * Initialize upper tab controls.
+		 */
 		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
 		final TabHost tabHost = mTabHost;
 		tabHost.setup();
 
 		Resources res = getResources();
-		
-		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_OVERVIEW)
-				.setIndicator("Overview", res.getDrawable(R.drawable.icon_overview)).setContent(this));
-		
+		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_OVERVIEW).setIndicator(
+				"Overview", res.getDrawable(R.drawable.icon_overview))
+				.setContent(this));
 		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_EXPENSES).setIndicator(
-				"Expenses", res.getDrawable(R.drawable.icon_expense)).setContent(this));
+				"Expenses", res.getDrawable(R.drawable.icon_expense))
+				.setContent(this));
 		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_BUDGETING).setIndicator(
-				"Budgeting", res.getDrawable(R.drawable.icon_budgeting)).setContent(this));
+				"Budgeting", res.getDrawable(R.drawable.icon_budgeting))
+				.setContent(this));
 		tabHost.addTab(tabHost.newTabSpec(VIEW_TAG_STATISTICS).setIndicator(
-				"Statistics", res.getDrawable(R.drawable.icon_statistics)).setContent(this));
+				"Statistics", res.getDrawable(R.drawable.icon_statistics))
+				.setContent(this));
 
 		/* Add tab change event handler */
 		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
@@ -120,7 +125,6 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 	/** {@inheritDoc} */
 	public View createTabContent(String tag) {
 		View view = null;
-
 		if (0 == tag.compareTo(VIEW_TAG_OVERVIEW)) {
 			view = getOverviewView();
 		} else if (0 == tag.compareTo(VIEW_TAG_EXPENSES)) {
@@ -132,10 +136,8 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 		} else {
 			return null;
 		}
-
 		return view;
 	}
-
 
 	/*
 	 * Resumed
@@ -143,10 +145,11 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
-		if(mTabHost != null) {
-			RRBudgetContent content = (RRBudgetContent) mTabHost.getCurrentView();
-			if(content != null) {
+
+		if (mTabHost != null) {
+			RRBudgetContent content = (RRBudgetContent) mTabHost
+					.getCurrentView();
+			if (content != null) {
 				content.onViewResumed();
 			}
 		}
@@ -221,34 +224,6 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 		return carouselView;
 	}
 
-	// /*
-	// * Get detail view
-	// */
-	// private View getDetailView() {
-	//
-	// /*
-	// * If expense id is not given, here the program uses latest expense.
-	// */
-	// Integer expenseId;
-	// if (null == param) {
-	// expenseId = mDbAdapter.queryLatestExpenseId();
-	// if (-1 == expenseId) {
-	// /* TODO: return empty view. */
-	// return null;
-	// }
-	// } else {
-	// /*
-	// * ?? I don't know java well. Following code is somewhat silly.
-	// */
-	// long val = (Long) param;
-	// expenseId = (int) val;
-	// }
-	//
-	// RRDetailExpenseView detailView = new RRDetailExpenseView(this);
-	// detailView.setExpense(mDbAdapter, expenseId);
-	// return detailView;
-	// }
-
 	/*
 	 * Statistics view
 	 */
@@ -283,10 +258,7 @@ public class Budgeting extends Activity implements TabHost.TabContentFactory {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		RRBudgetContent content = (RRBudgetContent) mTabHost.getCurrentView();
 		content.onMenuItemSelected(item);
-		
+
 		return super.onOptionsItemSelected(item);
 	}
-	
-	
-
 }
